@@ -607,7 +607,7 @@ def r_celebA(class_nbr, ep=10000,noise_level=.01,last_ep=0,dm_weights=None,gm_we
         gm.load_weights(gm_weights)
 
     for i in range(ep-last_ep):
-        show()
+#        show()
         for j in range(batch_size):
 #            noise_level *= 0.99
             print('---------------------------')
@@ -716,10 +716,10 @@ def save_image(save=False):
         cv2.imwrite(save,im[...,::-1]*255)
 
 #show('test2.png')
-r_celebA(class_nbr=4, ep=10000, last_ep=7490, dm_weights='dm_fce_4.hdf5', gm_weights='gm_fce_4.hdf5', save='fce_4')
+#r_celebA(class_nbr=4, ep=10000, last_ep=10000, dm_weights='dm_fce_4.hdf5', gm_weights='gm_fce_4.hdf5', save='fce_4')
 #r_celebA(class_nbr=0, ep=10000, last_ep=10000, dm_weights='dm_fce_0.hdf5', gm_weights='gm_fce_0.hdf5', save='fce_0')
-#r_celebA(class_nbr=1, ep=10000, last_ep=4130, dm_weights='dm_fce_1.hdf5', gm_weights='gm_fce1.hdf5', save='fce_1')
-#r_celebA(class_nbr=1, ep=10000, last_ep=4130, dm_weights='dm_fce_1.hdf5', gm_weights='gm_fce1.hdf5', save='fce_1')
+#r_celebA(class_nbr=1, ep=10000, last_ep=10000, dm_weights='dm_fce_1.hdf5', gm_weights='gm_fce_1.hdf5', save='fce_1')
+r_celebA(class_nbr=1, ep=10000, last_ep=3270, dm_weights='dm_fce_2.hdf5', gm_weights='gm_fce_2.hdf5', save='fce_2')
 #r_celebA(class_nbr=4, ep=10000, last_ep=0, dm_weights=None, gm_weights=None, save='fce_4')
 #dm.save_weights('')
 #show('test2.png')
