@@ -719,7 +719,7 @@ def save_image(save=False):
 #r_celebA(class_nbr=4, ep=10000, last_ep=10000, dm_weights='dm_fce_4.hdf5', gm_weights='gm_fce_4.hdf5', save='fce_4')
 #r_celebA(class_nbr=0, ep=10000, last_ep=10000, dm_weights='dm_fce_0.hdf5', gm_weights='gm_fce_0.hdf5', save='fce_0')
 #r_celebA(class_nbr=1, ep=10000, last_ep=10000, dm_weights='dm_fce_1.hdf5', gm_weights='gm_fce_1.hdf5', save='fce_1')
-r_celebA(class_nbr=2, ep=10000, last_ep=6650, dm_weights='dm_fce_2.hdf5', gm_weights='gm_fce_2.hdf5', save='fce_2')
+r_celebA(class_nbr=2, ep=10000, last_ep=9990, dm_weights='dm_fce_2.hdf5', gm_weights='gm_fce_2.hdf5', save='fce_2')
 #r_celebA(class_nbr=4, ep=10000, last_ep=0, dm_weights=None, gm_weights=None, save='fce_4')
 #dm.save_weights('')
 #show('test2.png')
