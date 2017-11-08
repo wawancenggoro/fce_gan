@@ -605,6 +605,8 @@ def r_celebA(class_nbr, ep=10000,noise_level=.01,last_ep=0,dm_weights=None,gm_we
         dm.load_weights(dm_weights)
     if gm_weights is not None:
         gm.load_weights(gm_weights)
+    
+    idx = train_data['targets'][:,class_nbr].nonzero()[0]
 
     for i in range(ep-last_ep):
         show(save+'.png')
@@ -614,10 +616,13 @@ def r_celebA(class_nbr, ep=10000,noise_level=.01,last_ep=0,dm_weights=None,gm_we
             print('iter',i+last_ep+1,'batch',j+1)
     
             # sample from cifar
-            idx = train_data['targets'][:,class_nbr].nonzero()[0].tolist()
+            np.random.shuffle(idx)
 #            j = i % int(len(idx)/batch_size)
-    #        IPython.embed()
-            minibatch = (train_data['features'][idx[j*batch_size:(j+1)*batch_size]]/255)-0.5
+#            IPython.embed()
+            idx_batch=idx[j*batch_size:(j+1)*batch_size]
+            idx_batch=np.sort(idx_batch).tolist()
+#            IPython.embed()
+            minibatch = (train_data['features'][idx_batch]/255)-0.5
             # minibatch += np.random.normal(loc=0.,scale=noise_level,size=subset_cifar.shape)
     
             z_input = np.random.normal(loc=0.,scale=1.,size=(batch_size,zed))
@@ -719,7 +724,8 @@ def save_image(save=False):
 #r_celebA(class_nbr=4, ep=10000, last_ep=10000, dm_weights='dm_fce_4.hdf5', gm_weights='gm_fce_4.hdf5', save='fce_4')
 #r_celebA(class_nbr=0, ep=10000, last_ep=10000, dm_weights='dm_fce_0.hdf5', gm_weights='gm_fce_0.hdf5', save='fce_0')
 #r_celebA(class_nbr=1, ep=10000, last_ep=10000, dm_weights='dm_fce_1.hdf5', gm_weights='gm_fce_1.hdf5', save='fce_1')
-r_celebA(class_nbr=2, ep=10000, last_ep=9990, dm_weights='dm_fce_2.hdf5', gm_weights='gm_fce_2.hdf5', save='fce_2')
+#r_celebA(class_nbr=2, ep=10000, last_ep=10000, dm_weights='dm_fce_2.hdf5', gm_weights='gm_fce_2.hdf5', save='fce_2')
 #r_celebA(class_nbr=4, ep=10000, last_ep=0, dm_weights=None, gm_weights=None, save='fce_4')
+r_celebA(class_nbr=5, ep=10000, last_ep=270, dm_weights='dm_fce_5.hdf5', gm_weights='gm_fce_5.hdf5', save='fce_5')
 #dm.save_weights('')
 #show('test2.png')
