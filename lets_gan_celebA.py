@@ -606,6 +606,51 @@ def r_celebA(class_nbr, ep=10000,noise_level=.01,last_ep=0,dm_weights=None,gm_we
     if gm_weights is not None:
         gm.load_weights(gm_weights)
     
+    idx = train_data['targets'][:,class_nbr].nonzero()[0].tolist()
+
+    for i in range(ep-last_ep):
+        show(save+'.png')
+        for j in range(batch_size):
+#            noise_level *= 0.99
+            print('---------------------------')
+            print('iter',i+last_ep+1,'batch',j+1)
+    
+            # sample from cifar
+#            j = i % int(len(idx)/batch_size)
+    #        IPython.embed()
+            minibatch = (train_data['features'][idx[j*batch_size:(j+1)*batch_size]]/255)-0.5
+            # minibatch += np.random.normal(loc=0.,scale=noise_level,size=subset_cifar.shape)
+    
+            z_input = np.random.normal(loc=0.,scale=1.,size=(batch_size,zed))
+    
+            # train for one step
+            losses = gan_feed(sess,minibatch,z_input)
+            print('dloss:{:6.4f} gloss:{:6.4f}'.format(losses[0],losses[1]))
+
+#        if i==ep-1 or i % 10==0: 
+#            show()
+        if (i+last_ep+1) % 10==0:
+#            show(save+'.png')
+            if save is not None:
+                dm.save_weights('dm_'+save+'.hdf5')
+                gm.save_weights('gm_'+save+'.hdf5')
+
+def r_celebA_shuffle(class_nbr, ep=10000,noise_level=.01,last_ep=0,dm_weights=None,gm_weights=None,save=None):
+    sess = K.get_session()
+
+#    np.random.shuffle(xt)
+#    shuffled_cifar = xt
+#    length = 162770
+#    length = 3713
+#    length = 50000
+#    length = 10000
+    
+#    class_nbr=4
+    if dm_weights is not None:
+        dm.load_weights(dm_weights)
+    if gm_weights is not None:
+        gm.load_weights(gm_weights)
+    
     idx = train_data['targets'][:,class_nbr].nonzero()[0]
 
     for i in range(ep-last_ep):
@@ -638,6 +683,7 @@ def r_celebA(class_nbr, ep=10000,noise_level=.01,last_ep=0,dm_weights=None,gm_we
             if save is not None:
                 dm.save_weights('dm_'+save+'.hdf5')
                 gm.save_weights('gm_'+save+'.hdf5')
+
 
 
 def autoscaler(img):
@@ -721,11 +767,12 @@ def save_image(save=False):
         cv2.imwrite(save,im[...,::-1]*255)
 
 #show('test2.png')
-#r_celebA(class_nbr=4, ep=10000, last_ep=10000, dm_weights='dm_fce_4.hdf5', gm_weights='gm_fce_4.hdf5', save='fce_4')
 #r_celebA(class_nbr=0, ep=10000, last_ep=10000, dm_weights='dm_fce_0.hdf5', gm_weights='gm_fce_0.hdf5', save='fce_0')
 #r_celebA(class_nbr=1, ep=10000, last_ep=10000, dm_weights='dm_fce_1.hdf5', gm_weights='gm_fce_1.hdf5', save='fce_1')
 #r_celebA(class_nbr=2, ep=10000, last_ep=10000, dm_weights='dm_fce_2.hdf5', gm_weights='gm_fce_2.hdf5', save='fce_2')
+r_celebA(class_nbr=3, ep=10000, last_ep=9810, dm_weights='dm_fce_3.hdf5', gm_weights='gm_fce_3.hdf5', save='fce_3')
+#r_celebA(class_nbr=4, ep=10000, last_ep=10000, dm_weights='dm_fce_4.hdf5', gm_weights='gm_fce_4.hdf5', save='fce_4')
 #r_celebA(class_nbr=4, ep=10000, last_ep=0, dm_weights=None, gm_weights=None, save='fce_4')
-r_celebA(class_nbr=5, ep=10000, last_ep=270, dm_weights='dm_fce_5.hdf5', gm_weights='gm_fce_5.hdf5', save='fce_5')
+#r_celebA(class_nbr=5, ep=10000, last_ep=1120, dm_weights='dm_fce_5.hdf5', gm_weights='gm_fce_5.hdf5', save='fce_5')
 #dm.save_weights('')
 #show('test2.png')
