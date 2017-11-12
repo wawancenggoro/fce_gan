@@ -44,6 +44,9 @@ import IPython
 import h5py
 from keras.utils.io_utils import HDF5Matrix
 from tensorflow.python import debug as tf_debug
+from keras.applications.resnet50 import ResNet50
+from keras.applications.inception_v3 import InceptionV3
+from keras import metrics, losses, regularizers
 
 #sess = K.get_session()
 #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
@@ -148,6 +151,7 @@ def hdf5_generator(dataset,set_type):
 #            y_single = y_data[i:i+1]
             yield(X_single, y_single)
             i+=1
+#            IPython.embed()
 
 def load_data_attr(dataset):
     if dataset=='mnist':
@@ -215,27 +219,35 @@ def gan_dis_model():
     ndf=24
     
     def conv(i,nop,kw,std=1,usebn=True,bm='same'):
+#        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='random_uniform', kernel_regularizer=regularizers.l2(0.01))(i)
         i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='random_uniform')(i)
         if usebn:
             i = BatchNormalization()(i)
+#            i = Dropout(0.5)(i)
         i = Activation('relu')(i)
         return i
     
     i = conv(i,ndf*1,4,std=2,usebn=False)
     i = concat_diff(i)
-    i = conv(i,ndf*2,4,std=2)
+    i = conv(i,ndf*2,4,std=2,usebn=True)
     i = concat_diff(i)
-    i = conv(i,ndf*4,4,std=2)
+    i = conv(i,ndf*4,4,std=2,usebn=True)
     i = concat_diff(i)
-    i = conv(i,ndf*8,4,std=2)
+    i = conv(i,ndf*8,4,std=2,usebn=True)
     i = concat_diff(i)
-    i = conv(i,ndf*8,4,std=2)
+    i = conv(i,ndf*8,4,std=2,usebn=True)
     i = concat_diff(i)
-    i = conv(i,ndf*8,4,std=2)
+    i = conv(i,ndf*8,4,std=2,usebn=True)
     i = concat_diff(i)
     i=Flatten()(i)
     i=Dense(num_classes)(i)
-    predictions=Activation('softmax')(i)
+##    i = Dropout(0.5)(i)
+#    i = Activation('relu')(i)
+#    i=Dense(num_classes)(i)
+##    i = Dropout(0.5)(i)
+#    i = Activation('relu')(i)
+#    i=Dense(num_classes)(i)
+    predictions=Activation('sigmoid')(i)
     model = Model(inputs=inp, outputs=predictions)  
     
     return model
@@ -463,14 +475,34 @@ num_classes, input_shape = load_data_attr('CelebA')
 #model = Xception(include_top=True, weights=None, input_shape=input_shape, classes=num_classes)
 model = gan_dis_model()
 #model = baseline_model_api(input_shape)
+
+# create the base pre-trained model
+#base_model = InceptionV3(weights='imagenet', include_top=False)
+#
+## add a global spatial average pooling layer
+#x = base_model.output
+#x = GlobalAveragePooling2D()(x)
+## let's add a fully-connected layer
+#x = Dense(1024, activation='relu')(x)
+## and a logistic layer -- let's say we have 200 classes
+#predictions = Dense(40, activation='softmax')(x)
+#
+## this is the model we will train
+#model = Model(inputs=base_model.input, outputs=predictions)
+#for layer in model.layers[:249]:
+#   layer.trainable = False
+#for layer in model.layers[249:]:
+#   layer.trainable = True
+
 model.summary()
 # Compile model
 opt = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
 #opt = optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.97)
 #opt = optimizers.SGD(lr=0.045, momentum=0.9, decay=0.9)
+#binary_accuracy(y_true, y_pred)
 model.compile(optimizer=opt,
           loss='binary_crossentropy',
-          metrics=['accuracy'])
+          metrics=[metrics.binary_accuracy])
 #IPython.embed()
 ## Fit the model
 #model.fit(X_train[0:162770], y_train[0:162770], validation_data=(X_val[162770:182637], y_val[162770:182637]), epochs=2, batch_size=200, verbose=2)
@@ -484,6 +516,7 @@ model.compile(optimizer=opt,
 # CelebA data size: train = 162770, valid = 19867, test = 19962
 callbacks = [TensorBoard(log_dir='./tf-logs')]
 result = model.fit_generator(hdf5_generator('CelebA','train'),814,10000,validation_data=hdf5_generator('CelebA','valid'),validation_steps=100,callbacks=callbacks)
+#result = model.fit_generator(hdf5_generator('CelebA','try'),20,10000,validation_data=None,callbacks=callbacks)
 
 ## Final evaluation of the model with generator
 scores = model.evaluate_generator(hdf5_generator('CelebA','test'),100)
