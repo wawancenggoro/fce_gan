@@ -10,7 +10,7 @@ from __future__ import absolute_import
 
 import warnings
 
-from keras.layers import concatenate
+from keras.layers import Concatenate, Maximum, Average
 from keras.layers import Lambda
 
 from keras.models import Model
@@ -44,6 +44,7 @@ import IPython
 import h5py
 from keras.utils.io_utils import HDF5Matrix
 from tensorflow.python import debug as tf_debug
+from keras import metrics, losses, regularizers
 
 #sess = K.get_session()
 #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
@@ -129,7 +130,22 @@ def hdf5_generator(dataset,set_type):
         elif set_type=='test':
             X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test.hdf5', 'features', normalizer=normalize_pixel)
             y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test.hdf5', 'targets')
-            size = 19962        
+            size = 19962   
+            
+        if set_type=='train_cls5':
+            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train_5cls.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train_5cls.hdf5', 'targets')
+            size = 122077        
+            
+        elif set_type=='valid_cls5':
+            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'targets')
+            size = 15138        
+            
+        elif set_type=='test_cls5':
+            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test_5cls.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test_5cls.hdf5', 'targets')
+            size = 14724          
             
         elif set_type=='all':
             X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5', 'features', normalizer=normalize_pixel)
@@ -143,7 +159,8 @@ def hdf5_generator(dataset,set_type):
                     
         while 1:
             X_single = X_data[i%size].reshape((1, 218, 178, 3))
-            y_single = y_data[i%size].reshape((1, 40))
+#            y_single = y_data[i%size].reshape((1, 40))
+            y_single = y_data[i%size].reshape((1, 5))
 #            X_single = X_data[i:i+1]
 #            y_single = y_data[i:i+1]
             yield(X_single, y_single)
@@ -155,6 +172,9 @@ def load_data_attr(dataset):
         input_shape=(28, 28, 1)
     elif dataset=='CelebA':   
         num_classes = 40
+        input_shape=(218, 178, 3)
+    elif dataset=='CelebA_cls5':   
+        num_classes = 5
         input_shape=(218, 178, 3)
         
     return num_classes, input_shape
@@ -175,7 +195,7 @@ def load_data_attr(dataset):
 def concat_diff(i): # batch discrimination -  increase generation diversity.
     # return i
     bv = Lambda(lambda i:K.mean(K.abs(i[:] - K.mean(i,axis=0)),axis=-1,keepdims=True))(i)
-    i = concatenate([i,bv])
+    i = Concatenate()([i,bv])
     return i
     
 def baseline_model():
@@ -206,38 +226,6 @@ def baseline_model_api(input_shape):
 #    model.compile(optimizer='adam',
 #              loss='categorical_crossentropy',
 #              metrics=['accuracy'])
-    return model
-
-def gan_dis_model():
-    inp = Input(shape=(218,178,3))
-    i = inp
-
-    ndf=24
-    
-    def conv(i,nop,kw,std=1,usebn=True,bm='same'):
-        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='random_uniform')(i)
-        if usebn:
-            i = BatchNormalization()(i)
-        i = Activation('relu')(i)
-        return i
-    
-    i = conv(i,ndf*1,4,std=2,usebn=False)
-    i = concat_diff(i)
-    i = conv(i,ndf*2,4,std=2)
-    i = concat_diff(i)
-    i = conv(i,ndf*4,4,std=2)
-    i = concat_diff(i)
-    i = conv(i,ndf*8,4,std=2)
-    i = concat_diff(i)
-    i = conv(i,ndf*8,4,std=2)
-    i = concat_diff(i)
-    i = conv(i,ndf*8,4,std=2)
-    i = concat_diff(i)
-    i=Flatten()(i)
-    i=Dense(num_classes)(i)
-    predictions=Activation('softmax')(i)
-    model = Model(inputs=inp, outputs=predictions)  
-    
     return model
 
 def Xception(include_top=True, weights='imagenet',
@@ -450,6 +438,111 @@ def Xception(include_top=True, weights='imagenet',
         K.set_image_data_format(old_data_format)
     return model
 
+def gan_dis_model_original():
+    inp = Input(shape=(218,178,3))
+    i = inp
+
+    ndf=24
+    
+    def conv(i,nop,kw,std=1,usebn=True,bm='same'):
+        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='random_uniform')(i)
+        if usebn:
+            i = BatchNormalization()(i)
+        i = Activation('relu')(i)
+        return i
+        
+    i = conv(i,ndf*1,4,std=2,usebn=False)
+    i = concat_diff(i)
+    i = conv(i,ndf*2,4,std=2)
+    i = concat_diff(i)
+    i = conv(i,ndf*4,4,std=2)
+    i = concat_diff(i)
+    i = conv(i,ndf*8,4,std=2)
+    i = concat_diff(i)
+    i = conv(i,ndf*8,4,std=2)
+    i = concat_diff(i)
+    i = conv(i,ndf*8,4,std=2)
+    i = concat_diff(i)
+    
+#    # 1x1
+    i = Conv2D(1,(2,2),padding='valid')(i)
+
+    i = Activation('linear',name='conv_exit')(i)
+    i = Activation('sigmoid')(i)
+
+#    i = Reshape((1,))(i)
+
+    m = Model(input=inp,output=i)
+    return m
+
+def gan_dis_model():
+    inp = Input(shape=(218,178,3))
+    i = inp
+
+    ndf=24
+    
+    def conv(i,nop,kw,std=1,usebn=True,bm='same'):
+        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='random_uniform')(i)
+        if usebn:
+            i = BatchNormalization()(i)
+        i = Activation('relu')(i)
+        return i
+        
+    i = conv(i,ndf*1,4,std=2,usebn=False)
+    i = concat_diff(i)
+    i = conv(i,ndf*2,4,std=2)
+    i = concat_diff(i)
+    i = conv(i,ndf*4,4,std=2)
+    i = concat_diff(i)
+    i = conv(i,ndf*8,4,std=2)
+    i = concat_diff(i)
+    i = conv(i,ndf*8,4,std=2)
+    i = concat_diff(i)
+    i = conv(i,ndf*8,4,std=2)
+    i = concat_diff(i)
+    i=Flatten()(i)
+    i=Dense(num_classes)(i)
+    predictions=Activation('sigmoid')(i)
+    model = Model(inputs=inp, outputs=predictions)  
+    
+    return model
+
+def gan_dis_model_cel():
+    inp = Input(shape=(218,178,3))
+    i = inp
+
+    ndf=24
+    
+    def conv(i,nop,kw,std=1,usebn=True,bm='same',name=''):
+        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='random_uniform',name='conv'+name)(i)
+        if usebn:
+            i = BatchNormalization(name='bn'+name)(i)
+        i = Activation('relu',name='relu'+name)(i)
+        return i
+        
+    i = conv(i,ndf*1,4,std=2,name='0',usebn=False)
+    i = concat_diff(i)
+    i = conv(i,ndf*2,4,std=2,name='1')
+    i = concat_diff(i)
+    i = conv(i,ndf*4,4,std=2,name='2')
+    i = concat_diff(i)
+    i = conv(i,ndf*8,4,std=2,name='3')
+    i = concat_diff(i)
+    i = conv(i,ndf*8,4,std=2,name='4')
+    i = concat_diff(i)
+    i0 = conv(i,ndf*8,4,std=2,name='6_cel0')
+    i1 = conv(i,ndf*8,4,std=2,name='6_cel1')
+    i2 = conv(i,ndf*8,4,std=2,name='6_cel2')
+    i3 = conv(i,ndf*8,4,std=2,name='6_cel3')
+    i4 = conv(i,ndf*8,4,std=2,name='6_cel4')
+    i = Average()([i0,i1,i2,i3,i4])
+    i = concat_diff(i)
+    i=Flatten()(i)
+    i=Dense(num_classes)(i)
+    predictions=Activation('sigmoid')(i)
+    model = Model(inputs=inp, outputs=predictions)  
+    
+    return model
 	
 # fix random seed for reproducibility
 seed = 7
@@ -458,10 +551,64 @@ numpy.random.seed(seed)
 #IPython.embed()
 
 #(X_train, y_train), (X_val, y_val), (X_test, y_test), num_classes, input_shape = load_data('CelebAHDF5')
-num_classes, input_shape = load_data_attr('CelebA')
+num_classes, input_shape = load_data_attr('CelebA_cls5')
 # build the model
 #model = Xception(include_top=True, weights=None, input_shape=input_shape, classes=num_classes)
-model = gan_dis_model()
+model0 = gan_dis_model_original()
+model0.load_weights('/home/wawan/git/fce_gan/save/dm_fce_0.hdf5')
+weights_conv6_cel0 = model0.layers[25].get_weights()
+weights_bn6_cel0 = model0.layers[26].get_weights()
+
+model1 = gan_dis_model_original()
+model1.load_weights('/home/wawan/git/fce_gan/save/dm_fce_1.hdf5')
+weights_conv6_cel1 = model1.layers[25].get_weights()
+weights_bn6_cel1 = model1.layers[26].get_weights()
+
+
+model2 = gan_dis_model_original()
+model2.load_weights('/home/wawan/git/fce_gan/save/dm_fce_2.hdf5')
+weights_conv6_cel2 = model2.layers[25].get_weights()
+weights_bn6_cel2 = model2.layers[26].get_weights()
+
+
+model3 = gan_dis_model_original()
+model3.load_weights('/home/wawan/git/fce_gan/save/dm_fce_3.hdf5')
+weights_conv6_cel3 = model3.layers[25].get_weights()
+weights_bn6_cel3 = model3.layers[26].get_weights()
+
+
+model4 = gan_dis_model_original()
+model4.load_weights('/home/wawan/git/fce_gan/save/dm_fce_4.hdf5')
+weights_conv6_cel4 = model4.layers[25].get_weights()
+weights_bn6_cel4 = model4.layers[26].get_weights()
+
+
+model = gan_dis_model_cel()
+
+model.layers[25].set_weights(weights_conv6_cel0)
+model.layers[26].set_weights(weights_conv6_cel1)
+model.layers[27].set_weights(weights_conv6_cel2)
+model.layers[28].set_weights(weights_conv6_cel3)
+model.layers[29].set_weights(weights_conv6_cel4)
+
+model.layers[30].set_weights(weights_bn6_cel0)
+model.layers[31].set_weights(weights_bn6_cel1)
+model.layers[32].set_weights(weights_bn6_cel2)
+model.layers[33].set_weights(weights_bn6_cel3)
+model.layers[34].set_weights(weights_bn6_cel4)
+
+model.layers[25].trainable = False
+model.layers[26].trainable = False
+model.layers[27].trainable = False
+model.layers[28].trainable = False
+model.layers[29].trainable = False
+model.layers[30].trainable = False
+model.layers[31].trainable = False
+model.layers[32].trainable = False
+model.layers[33].trainable = False
+model.layers[34].trainable = False
+
+#model = gan_dis_model()
 #model = baseline_model_api(input_shape)
 model.summary()
 # Compile model
@@ -469,8 +616,8 @@ opt = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0
 #opt = optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.97)
 #opt = optimizers.SGD(lr=0.045, momentum=0.9, decay=0.9)
 model.compile(optimizer=opt,
-          loss='binary_crossentropy',
-          metrics=['accuracy'])
+          loss=losses.binary_crossentropy,
+          metrics=[metrics.binary_accuracy])
 #IPython.embed()
 ## Fit the model
 #model.fit(X_train[0:162770], y_train[0:162770], validation_data=(X_val[162770:182637], y_val[162770:182637]), epochs=2, batch_size=200, verbose=2)
@@ -483,12 +630,12 @@ model.compile(optimizer=opt,
 # Fit the model with generator
 # CelebA data size: train = 162770, valid = 19867, test = 19962
 callbacks = [TensorBoard(log_dir='./tf-logs')]
-result = model.fit_generator(hdf5_generator('CelebA','train'),814,10000,validation_data=hdf5_generator('CelebA','valid'),validation_steps=100,callbacks=callbacks)
+result = model.fit_generator(hdf5_generator('CelebA','train_cls5'),611,10000,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=76,callbacks=callbacks)
 
 ## Final evaluation of the model with generator
-scores = model.evaluate_generator(hdf5_generator('CelebA','test'),100)
+scores = model.evaluate_generator(hdf5_generator('CelebA','test_cls5'),74)
 print("Baseline Error: %.2f%%" % (100-scores[1]*100))
-prediction=model.predict_generator(hdf5_generator('CelebA','test'), 100)
+prediction=model.predict_generator(hdf5_generator('CelebA','test_cls5'), 74)
 
 
 #IPython.embed()
