@@ -27,7 +27,7 @@ from keras.layers import GlobalMaxPooling2D
 from keras.engine.topology import get_source_inputs
 from keras.utils.data_utils import get_file
 from keras import backend as K
-from keras.callbacks import TensorBoard
+from keras.callbacks import TensorBoard, ModelCheckpoint, CSVLogger
 
 
 TF_WEIGHTS_PATH = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.4/xception_weights_tf_dim_ordering_tf_kernels.h5'
@@ -554,6 +554,8 @@ numpy.random.seed(seed)
 num_classes, input_shape = load_data_attr('CelebA_cls5')
 # build the model
 #model = Xception(include_top=True, weights=None, input_shape=input_shape, classes=num_classes)
+
+#fce-gan
 model0 = gan_dis_model_original()
 model0.load_weights('/home/wawan/git/fce_gan/save/dm_fce_0.hdf5')
 weights_conv6_cel0 = model0.layers[25].get_weights()
@@ -564,24 +566,20 @@ model1.load_weights('/home/wawan/git/fce_gan/save/dm_fce_1.hdf5')
 weights_conv6_cel1 = model1.layers[25].get_weights()
 weights_bn6_cel1 = model1.layers[26].get_weights()
 
-
 model2 = gan_dis_model_original()
 model2.load_weights('/home/wawan/git/fce_gan/save/dm_fce_2.hdf5')
 weights_conv6_cel2 = model2.layers[25].get_weights()
 weights_bn6_cel2 = model2.layers[26].get_weights()
-
 
 model3 = gan_dis_model_original()
 model3.load_weights('/home/wawan/git/fce_gan/save/dm_fce_3.hdf5')
 weights_conv6_cel3 = model3.layers[25].get_weights()
 weights_bn6_cel3 = model3.layers[26].get_weights()
 
-
 model4 = gan_dis_model_original()
 model4.load_weights('/home/wawan/git/fce_gan/save/dm_fce_4.hdf5')
 weights_conv6_cel4 = model4.layers[25].get_weights()
 weights_bn6_cel4 = model4.layers[26].get_weights()
-
 
 model = gan_dis_model_cel()
 
@@ -617,7 +615,14 @@ opt = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0
 #opt = optimizers.SGD(lr=0.045, momentum=0.9, decay=0.9)
 model.compile(optimizer=opt,
           loss=losses.binary_crossentropy,
-          metrics=[metrics.binary_accuracy])
+          metrics=['accuracy'])
+          
+filepath="cnn_weights_best.hdf5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+csv_logger = CSVLogger('training.log', append=False)
+tensorboard = TensorBoard(log_dir='./tf-logs')
+callbacks_list = [checkpoint, csv_logger, tensorboard]
+
 #IPython.embed()
 ## Fit the model
 #model.fit(X_train[0:162770], y_train[0:162770], validation_data=(X_val[162770:182637], y_val[162770:182637]), epochs=2, batch_size=200, verbose=2)
@@ -629,8 +634,8 @@ model.compile(optimizer=opt,
 
 # Fit the model with generator
 # CelebA data size: train = 162770, valid = 19867, test = 19962
-callbacks = [TensorBoard(log_dir='./tf-logs')]
-result = model.fit_generator(hdf5_generator('CelebA','train_cls5'),611,10000,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=76,callbacks=callbacks)
+#callbacks = [TensorBoard(log_dir='./tf-logs')]
+result = model.fit_generator(hdf5_generator('CelebA','train_cls5'),611,1000,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=76,callbacks=callbacks_list)
 
 ## Final evaluation of the model with generator
 scores = model.evaluate_generator(hdf5_generator('CelebA','test_cls5'),74)
