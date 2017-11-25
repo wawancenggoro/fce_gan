@@ -445,7 +445,7 @@ def gan_dis_model_original():
     ndf=24
     
     def conv(i,nop,kw,std=1,usebn=True,bm='same'):
-        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5))(i)
+        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='random_uniform')(i)
         if usebn:
             i = BatchNormalization()(i)
         i = Activation('relu')(i)
@@ -481,31 +481,31 @@ def gan_dis_model():
 
     ndf=24
     
-    def conv(i,nop,kw,std=1,usebn=True,bm='same',name=''):
-        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='conv'+name)(i)
+    def conv(i,nop,kw,std=1,usebn=True,bm='same'):
+        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='random_uniform')(i)
         if usebn:
-            i = BatchNormalization(name='bn'+name)(i)
-        i = Activation('relu',name='relu'+name)(i)
+            i = BatchNormalization()(i)
+        i = Activation('relu')(i)
         return i
         
-    i = conv(i,ndf*1,4,std=2,name='0',usebn=False)
+    i = conv(i,ndf*1,4,std=2,usebn=False)
     i = concat_diff(i)
-    i = conv(i,ndf*2,4,std=2,name='1')
+    i = conv(i,ndf*2,4,std=2)
     i = concat_diff(i)
-    i = conv(i,ndf*4,4,std=2,name='2')
+    i = conv(i,ndf*4,4,std=2)
     i = concat_diff(i)
-    i = conv(i,ndf*8,4,std=2,name='3')
+    i = conv(i,ndf*8,4,std=2)
     i = concat_diff(i)
-    i = conv(i,ndf*8,4,std=2,name='4')
+    i = conv(i,ndf*8,4,std=2)
     i = concat_diff(i)
-    i = conv(i,ndf*8,4,std=2,name='5')
+    i = conv(i,ndf*8,4,std=2)
     i = concat_diff(i)
     i = Flatten()(i)
-    i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='dense1')(i)
+    i = Dense(200)(i)
     i = Activation('relu',name='relu_dens1')(i)
-    # i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='dense2')(i)
+    # i = Dense(200)(i)
     # i = Activation('relu',name='relu_dens2')(i)
-    i = Dense(num_classes, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='last_dense')(i)
+    i = Dense(num_classes)(i)
     predictions=Activation('sigmoid')(i)
     model = Model(inputs=inp, outputs=predictions)  
     
@@ -518,7 +518,7 @@ def gan_dis_model_cel():
     ndf=24
     
     def conv(i,nop,kw,std=1,usebn=True,bm='same',name=''):
-        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='conv'+name)(i)
+        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='random_uniform',name='conv'+name)(i)
         if usebn:
             i = BatchNormalization(name='bn'+name)(i)
         i = Activation('relu',name='relu'+name)(i)
@@ -561,38 +561,25 @@ def gan_dis_model_cel():
     i = conv(i,ndf*8,4,std=2,name='3')
     i = concat_diff(i)
     i0 = conv(i,ndf*8,4,std=2,name='4_cel0')
-    i0 = concat_diff(i0)
     i1 = conv(i,ndf*8,4,std=2,name='4_cel1')
-    i1 = concat_diff(i1)
     i2 = conv(i,ndf*8,4,std=2,name='4_cel2')
-    i2 = concat_diff(i2)
     i3 = conv(i,ndf*8,4,std=2,name='4_cel3')
-    i3 = concat_diff(i3)
     i4 = conv(i,ndf*8,4,std=2,name='4_cel4')
-    i4 = concat_diff(i4)
-    i0 = conv(i,ndf*8,4,std=2,name='5_cel0')
-    i0 = concat_diff(i0)
-    i0 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='conv5.5_cel0')(i0)
-    i1 = conv(i,ndf*8,4,std=2,name='5_cel1')
-    i1 = concat_diff(i1)
-    i1 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='conv5.5_cel1')(i1)
-    i2 = conv(i,ndf*8,4,std=2,name='5_cel2')
-    i2 = concat_diff(i2)
-    i2 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='conv5.5_cel2')(i2)
-    i3 = conv(i,ndf*8,4,std=2,name='5_cel3')
-    i3 = concat_diff(i3)
-    i3 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='conv5.5_cel3')(i3)
-    i4 = conv(i,ndf*8,4,std=2,name='5_cel4')
-    i4 = concat_diff(i4)
-    i4 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='conv5.5_cel4')(i4)
-    i = Concatenate()([i0,i1,i2,i3,i4])
+    i = Average()([i0,i1,i2,i3,i4])
     i = concat_diff(i)
-    i = Flatten()(i)
-    i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='dense1')(i)
+    i0 = conv(i,ndf*8,4,std=2,name='5_cel0')
+    i1 = conv(i,ndf*8,4,std=2,name='5_cel1')
+    i2 = conv(i,ndf*8,4,std=2,name='5_cel2')
+    i3 = conv(i,ndf*8,4,std=2,name='5_cel3')
+    i4 = conv(i,ndf*8,4,std=2,name='5_cel4')
+    i = Average()([i0,i1,i2,i3,i4])
+    i = concat_diff(i)
+    i=Flatten()(i)
+    i = Dense(200)(i)
     i = Activation('relu',name='relu_dens1')(i)
-    # i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='dense2')(i)
+    # i = Dense(200)(i)
     # i = Activation('relu',name='relu_dens2')(i)
-    i = Dense(num_classes, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(1e-5), bias_regularizer=regularizers.l2(1e-5),name='last_dense')(i)
+    i = Dense(num_classes)(i)
     predictions=Activation('sigmoid')(i)
     model = Model(inputs=inp, outputs=predictions)  
     
@@ -865,6 +852,8 @@ num_classes, input_shape = load_data_attr('CelebA_cls5')
 # model.layers[60].trainable = False
 
 model = gan_dis_model()
+filepath="cnn_weights_best.hdf5"
+model.load_weights('/home/wawan/git/fce_gan/save/glorot_normal/normal_dens2_l2glorot_cnn_weights_best.hdf5')
 #model = baseline_model_api(input_shape)
 model.summary()
 # Compile model
@@ -875,11 +864,10 @@ model.compile(optimizer=opt,
           loss=losses.binary_crossentropy,
           metrics=['accuracy'])
           
-filepath="cnn_weights_best.hdf5"
-checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-csv_logger = CSVLogger('training.log', append=False)
-tensorboard = TensorBoard(log_dir='./tf-logs')
-callbacks_list = [checkpoint, csv_logger, tensorboard]
+# checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+# csv_logger = CSVLogger('training.log', append=False)
+# tensorboard = TensorBoard(log_dir='./tf-logs')
+# callbacks_list = [checkpoint, csv_logger, tensorboard]
 
 #IPython.embed()
 ## Fit the model
@@ -893,7 +881,7 @@ callbacks_list = [checkpoint, csv_logger, tensorboard]
 # Fit the model with generator
 # CelebA data size: train = 162770, valid = 19867, test = 19962
 #callbacks = [TensorBoard(log_dir='./tf-logs')]
-result = model.fit_generator(hdf5_generator('CelebA','train_cls5'),611,1000,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=76,callbacks=callbacks_list)
+# result = model.fit_generator(hdf5_generator('CelebA','train_cls5'),611,1000,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=76,callbacks=callbacks_list)
 
 ## Final evaluation of the model with generator
 scores = model.evaluate_generator(hdf5_generator('CelebA','test_cls5'),74)
@@ -901,4 +889,4 @@ print("Baseline Error: %.2f%%" % (100-scores[1]*100))
 prediction=model.predict_generator(hdf5_generator('CelebA','test_cls5'), 74)
 
 
-#IPython.embed()
+IPython.embed()
