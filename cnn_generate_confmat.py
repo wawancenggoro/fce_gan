@@ -75,7 +75,7 @@ def load_data(dataset):
         input_shape=(28, 28, 1)
     elif dataset=='CelebA':
         # load data CelebA
-        f=h5py.File('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5','r')
+        f=h5py.File('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5','r')
         X_train=f['features'][0:1000]
         X_val=f['features'][1000:1100]
         X_test=f['features'][1100:1200]
@@ -91,8 +91,8 @@ def load_data(dataset):
         input_shape=(218, 178, 3)
     elif dataset=='CelebAHDF5':
         # load data CelebA
-        X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_normalized.hdf5', 'features')
-        y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_normalized.hdf5', 'targets')
+        X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_normalized.hdf5', 'features')
+        y_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_normalized.hdf5', 'targets')
 #        X_train=X_data[0:162770]
 #        X_val=X_data[162770:182637]
 #        X_test=X_data[182637:202599]
@@ -118,38 +118,38 @@ def hdf5_generator(dataset,set_type):
     # CelebA data size: train = 162770, valid = 19867, test = 19962
     if dataset=='CelebA':    
         if set_type=='train':
-            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train.hdf5', 'features', normalizer=normalize_pixel)
-            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train.hdf5', 'targets')
+            X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_train.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_train.hdf5', 'targets')
             size = 162770        
             
         elif set_type=='valid':
-            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid.hdf5', 'features', normalizer=normalize_pixel)
-            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid.hdf5', 'targets')
+            X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid.hdf5', 'targets')
             size = 19867        
             
         elif set_type=='test':
-            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test.hdf5', 'features', normalizer=normalize_pixel)
-            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test.hdf5', 'targets')
+            X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_test.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_test.hdf5', 'targets')
             size = 19962   
             
         if set_type=='train_cls5':
-            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train_5cls.hdf5', 'features', normalizer=normalize_pixel)
-            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train_5cls.hdf5', 'targets')
+            X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_train_5cls.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_train_5cls.hdf5', 'targets')
             size = 122077        
             
         elif set_type=='valid_cls5':
-            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'features', normalizer=normalize_pixel)
-            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'targets')
+            X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'targets')
             size = 15138        
             
         elif set_type=='test_cls5':
-            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test_5cls.hdf5', 'features', normalizer=normalize_pixel)
-            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test_5cls.hdf5', 'targets')
+            X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_test_5cls.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_test_5cls.hdf5', 'targets')
             size = 14724          
             
         elif set_type=='all':
-            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5', 'features', normalizer=normalize_pixel)
-            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5', 'targets')
+            X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5', 'targets')
             size = 202599        
                 
         elif set_type=='try':
@@ -621,7 +621,7 @@ def gan_dis_model_cel():
 # fix random seed for reproducibility
 seed = 7
 numpy.random.seed(seed)
-#X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5', 'features', normalizer=normalize_pixel) 
+#X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5', 'features', normalizer=normalize_pixel) 
 #IPython.embed()
 
 #(X_train, y_train), (X_val, y_val), (X_test, y_test), num_classes, input_shape = load_data('CelebAHDF5')
@@ -853,7 +853,7 @@ num_classes, input_shape = load_data_attr('CelebA_cls5')
 
 model = gan_dis_model()
 filepath="cnn_weights_best.hdf5"
-model.load_weights('/home/wawan/git/fce_gan/save/glorot_normal/normal_dens2_l2glorot_cnn_weights_best.hdf5')
+model.load_weights('/home/ubuntuone/Projects/fce_gan/save/glorot_normal/normal_dens2_l2glorot_cnn_weights_best.hdf5')
 #model = baseline_model_api(input_shape)
 model.summary()
 # Compile model
@@ -884,9 +884,70 @@ model.compile(optimizer=opt,
 # result = model.fit_generator(hdf5_generator('CelebA','train_cls5'),611,1000,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=76,callbacks=callbacks_list)
 
 ## Final evaluation of the model with generator
-scores = model.evaluate_generator(hdf5_generator('CelebA','test_cls5'),74)
-print("Baseline Error: %.2f%%" % (100-scores[1]*100))
-prediction=model.predict_generator(hdf5_generator('CelebA','test_cls5'), 74)
+# scores = model.evaluate_generator(hdf5_generator('CelebA','test_cls5'),74)
+# print("Baseline Error: %.2f%%" % (100-scores[1]*100))
+prediction=model.predict_generator(hdf5_generator('CelebA','test_cls5'), 14724)
+prediction=numpy.transpose(prediction)
+prediction[prediction<0.5]=0
+prediction[prediction>=0.5]=1
+prediction.astype(int)
+prediction_flip=numpy.absolute(1-prediction)
 
+y_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_test_5cls.hdf5', 'targets')
+y_data=y_data[:].astype(int)
+y_data_flip=numpy.absolute(1-y_data)
+
+confmat=numpy.matmul(prediction, y_data)
+confmat_flip=numpy.matmul(prediction_flip, y_data_flip)
+
+ap=numpy.count_nonzero(y_data[:,0])+numpy.count_nonzero(y_data[:,1])+numpy.count_nonzero(y_data[:,2])+numpy.count_nonzero(y_data[:,3])+numpy.count_nonzero(y_data[:,4])
+an=numpy.count_nonzero(y_data_flip[:,0])+numpy.count_nonzero(y_data_flip[:,1])+numpy.count_nonzero(y_data_flip[:,2])+numpy.count_nonzero(y_data_flip[:,3])+numpy.count_nonzero(y_data_flip[:,4])
+tp=confmat[0,0]+confmat[1,1]+confmat[2,2]+confmat[3,3]+confmat[4,4]
+tn=confmat_flip[0,0]+confmat_flip[1,1]+confmat_flip[2,2]+confmat_flip[3,3]+confmat_flip[4,4]
+fp=ap-tp
+fn=an-fn
+precision=tp/ap
+recall=tp/(tp+fn)
+acc=(tp+tn)/(ap+an)
+
+ap1=numpy.count_nonzero(y_data[:,1])
+an1=numpy.count_nonzero(y_data_flip[:,1])
+tp1=confmat[1,1]
+tn1=confmat_flip[1,1]
+fp1=ap1-tp1
+fn1=an1-fn1
+precision1=tp1/ap1
+recall1=tp1/(tp1+fn1)
+acc1=(tp1+tn1)/(ap1+an1)
+
+ap2=numpy.count_nonzero(y_data[:,2])
+an2=numpy.count_nonzero(y_data_flip[:,2])
+tp2=confmat[2,2]
+tn2=confmat_flip[2,2]
+fp2=ap2-tp2
+fn2=an2-fn2
+precision2=tp2/ap2
+recall2=tp2/(tp2+fn2)
+acc2=(tp2+tn2)/(ap2+an2)
+
+ap3=numpy.count_nonzero(y_data[:,3])
+an3=numpy.count_nonzero(y_data_flip[:,3])
+tp3=confmat[3,3]
+tn3=confmat_flip[3,3]
+fp3=ap3-tp3
+fn3=an3-fn3
+precision3=tp3/ap3
+recall3=tp3/(tp3+fn3)
+acc3=(tp3+tn3)/(ap3+an3)
+
+ap4=numpy.count_nonzero(y_data[:,4])
+an4=numpy.count_nonzero(y_data_flip[:,4])
+tp4=confmat[4,4]
+tn4=confmat_flip[4,4]
+fp4=ap4-tp4
+fn4=an4-fn4
+precision4=tp4/ap4
+recall4=tp4/(tp4+fn4)
+acc4=(tp4+tn4)/(ap4+an4)
 
 IPython.embed()
