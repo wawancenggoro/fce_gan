@@ -853,7 +853,7 @@ num_classes, input_shape = load_data_attr('CelebA_cls5')
 
 model = gan_dis_model()
 filepath="cnn_weights_best.hdf5"
-model.load_weights('/home/ubuntuone/Projects/fce_gan/save/glorot_normal/normal_dens2_l2glorot_cnn_weights_best.hdf5')
+model.load_weights('/home/ubuntuone/Projects/fce_gan/save/cnn/normal_cnn_weights_best.hdf5')
 #model = baseline_model_api(input_shape)
 model.summary()
 # Compile model
@@ -905,17 +905,28 @@ an=numpy.count_nonzero(y_data_flip[:,0])+numpy.count_nonzero(y_data_flip[:,1])+n
 tp=confmat[0,0]+confmat[1,1]+confmat[2,2]+confmat[3,3]+confmat[4,4]
 tn=confmat_flip[0,0]+confmat_flip[1,1]+confmat_flip[2,2]+confmat_flip[3,3]+confmat_flip[4,4]
 fp=ap-tp
-fn=an-fn
+fn=an-tn
 precision=tp/ap
 recall=tp/(tp+fn)
 acc=(tp+tn)/(ap+an)
+
+
+ap0=numpy.count_nonzero(y_data[:,0])
+an0=numpy.count_nonzero(y_data_flip[:,0])
+tp0=confmat[0,0]
+tn0=confmat_flip[0,0]
+fp0=ap0-tp0
+fn0=an0-tn0
+precision0=tp0/ap0
+recall0=tp0/(tp0+fn0)
+acc0=(tp0+tn0)/(ap0+an0)
 
 ap1=numpy.count_nonzero(y_data[:,1])
 an1=numpy.count_nonzero(y_data_flip[:,1])
 tp1=confmat[1,1]
 tn1=confmat_flip[1,1]
 fp1=ap1-tp1
-fn1=an1-fn1
+fn1=an1-tn1
 precision1=tp1/ap1
 recall1=tp1/(tp1+fn1)
 acc1=(tp1+tn1)/(ap1+an1)
@@ -925,7 +936,7 @@ an2=numpy.count_nonzero(y_data_flip[:,2])
 tp2=confmat[2,2]
 tn2=confmat_flip[2,2]
 fp2=ap2-tp2
-fn2=an2-fn2
+fn2=an2-tn2
 precision2=tp2/ap2
 recall2=tp2/(tp2+fn2)
 acc2=(tp2+tn2)/(ap2+an2)
@@ -935,7 +946,7 @@ an3=numpy.count_nonzero(y_data_flip[:,3])
 tp3=confmat[3,3]
 tn3=confmat_flip[3,3]
 fp3=ap3-tp3
-fn3=an3-fn3
+fn3=an3-tn3
 precision3=tp3/ap3
 recall3=tp3/(tp3+fn3)
 acc3=(tp3+tn3)/(ap3+an3)
@@ -945,7 +956,7 @@ an4=numpy.count_nonzero(y_data_flip[:,4])
 tp4=confmat[4,4]
 tn4=confmat_flip[4,4]
 fp4=ap4-tp4
-fn4=an4-fn4
+fn4=an4-tn4
 precision4=tp4/ap4
 recall4=tp4/(tp4+fn4)
 acc4=(tp4+tn4)/(ap4+an4)
