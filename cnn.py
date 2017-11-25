@@ -564,78 +564,23 @@ def gan_dis_model_cel():
     # model = Model(inputs=inp, outputs=predictions)  
 
     # 4 and 5
-    i = conv(i,ndf*1,4,std=2,name='0',usebn=False)
-    i = concat_diff(i)
-    i = conv(i,ndf*2,4,std=2,name='1')
-    i = concat_diff(i)
-    i = conv(i,ndf*4,4,std=2,name='2')
-    i = concat_diff(i)
-    i = conv(i,ndf*8,4,std=2,name='3')
-    i = concat_diff(i)
-    i0 = conv(i,ndf*8,4,std=2,name='4_cel0')
-    i0 = concat_diff(i0)
-    i1 = conv(i,ndf*8,4,std=2,name='4_cel1')
-    i1 = concat_diff(i1)
-    i2 = conv(i,ndf*8,4,std=2,name='4_cel2')
-    i2 = concat_diff(i2)
-    i3 = conv(i,ndf*8,4,std=2,name='4_cel3')
-    i3 = concat_diff(i3)
-    i4 = conv(i,ndf*8,4,std=2,name='4_cel4')
-    i4 = concat_diff(i4)
-    i0 = conv(i0,ndf*8,4,std=2,name='5_cel0')
-    i0 = concat_diff(i0)
-    i0 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel0')(i0)
-    i1 = conv(i1,ndf*8,4,std=2,name='5_cel1')
-    i1 = concat_diff(i1)
-    i1 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel1')(i1)
-    i2 = conv(i2,ndf*8,4,std=2,name='5_cel2')
-    i2 = concat_diff(i2)
-    i2 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel2')(i2)
-    i3 = conv(i3,ndf*8,4,std=2,name='5_cel3')
-    i3 = concat_diff(i3)
-    i3 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel3')(i3)
-    i4 = conv(i4,ndf*8,4,std=2,name='5_cel4')
-    i4 = concat_diff(i4)
-    i4 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel4')(i4)
-    i = Concatenate()([i0,i1,i2,i3,i4])
-    i = concat_diff(i)
-    i = Flatten()(i)
-    i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='dense1')(i)
-    i = Activation('relu',name='relu_dens1')(i)
-    # i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='dense2')(i)
-    # i = Activation('relu',name='relu_dens2')(i)
-    i = Dense(num_classes, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='last_dense')(i)
-    predictions=Activation('sigmoid')(i)
-    model = Model(inputs=inp, outputs=predictions)  
-    
-    # 3, 4, and 5
     # i = conv(i,ndf*1,4,std=2,name='0',usebn=False)
     # i = concat_diff(i)
     # i = conv(i,ndf*2,4,std=2,name='1')
     # i = concat_diff(i)
     # i = conv(i,ndf*4,4,std=2,name='2')
     # i = concat_diff(i)
-    # i0 = conv(i,ndf*8,4,std=2,name='3_cel0')
-    # i0 = concat_diff(i0)
-    # i1 = conv(i,ndf*8,4,std=2,name='3_cel1')
-    # i1 = concat_diff(i1)
-    # i2 = conv(i,ndf*8,4,std=2,name='3_cel2')
-    # i2 = concat_diff(i2)
-    # i3 = conv(i,ndf*8,4,std=2,name='3_cel3')
-    # i3 = concat_diff(i3)
-    # i4 = conv(i,ndf*8,4,std=2,name='3_cel4')
-    # i4 = concat_diff(i4)
-    # i = Average()([i0,i1,i2,i3,i4])
+    # i = conv(i,ndf*8,4,std=2,name='3')
     # i = concat_diff(i)
-    # i0 = conv(i0,ndf*8,4,std=2,name='4_cel0')
+    # i0 = conv(i,ndf*8,4,std=2,name='4_cel0')
     # i0 = concat_diff(i0)
-    # i1 = conv(i1,ndf*8,4,std=2,name='4_cel1')
+    # i1 = conv(i,ndf*8,4,std=2,name='4_cel1')
     # i1 = concat_diff(i1)
-    # i2 = conv(i2,ndf*8,4,std=2,name='4_cel2')
+    # i2 = conv(i,ndf*8,4,std=2,name='4_cel2')
     # i2 = concat_diff(i2)
-    # i3 = conv(i3,ndf*8,4,std=2,name='4_cel3')
+    # i3 = conv(i,ndf*8,4,std=2,name='4_cel3')
     # i3 = concat_diff(i3)
-    # i4 = conv(i4,ndf*8,4,std=2,name='4_cel4')
+    # i4 = conv(i,ndf*8,4,std=2,name='4_cel4')
     # i4 = concat_diff(i4)
     # i0 = conv(i0,ndf*8,4,std=2,name='5_cel0')
     # i0 = concat_diff(i0)
@@ -662,6 +607,59 @@ def gan_dis_model_cel():
     # i = Dense(num_classes, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='last_dense')(i)
     # predictions=Activation('sigmoid')(i)
     # model = Model(inputs=inp, outputs=predictions)  
+    
+    # 3, 4, and 5
+    i = conv(i,ndf*1,4,std=2,name='0',usebn=False)
+    i = concat_diff(i)
+    i = conv(i,ndf*2,4,std=2,name='1')
+    i = concat_diff(i)
+    i = conv(i,ndf*4,4,std=2,name='2')
+    i = concat_diff(i)
+    i0 = conv(i,ndf*8,4,std=2,name='3_cel0')
+    i0 = concat_diff(i0)
+    i1 = conv(i,ndf*8,4,std=2,name='3_cel1')
+    i1 = concat_diff(i1)
+    i2 = conv(i,ndf*8,4,std=2,name='3_cel2')
+    i2 = concat_diff(i2)
+    i3 = conv(i,ndf*8,4,std=2,name='3_cel3')
+    i3 = concat_diff(i3)
+    i4 = conv(i,ndf*8,4,std=2,name='3_cel4')
+    i4 = concat_diff(i4)
+    i0 = conv(i0,ndf*8,4,std=2,name='4_cel0')
+    i0 = concat_diff(i0)
+    i1 = conv(i1,ndf*8,4,std=2,name='4_cel1')
+    i1 = concat_diff(i1)
+    i2 = conv(i2,ndf*8,4,std=2,name='4_cel2')
+    i2 = concat_diff(i2)
+    i3 = conv(i3,ndf*8,4,std=2,name='4_cel3')
+    i3 = concat_diff(i3)
+    i4 = conv(i4,ndf*8,4,std=2,name='4_cel4')
+    i4 = concat_diff(i4)
+    i0 = conv(i0,ndf*8,4,std=2,name='5_cel0')
+    i0 = concat_diff(i0)
+    i0 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel0')(i0)
+    i1 = conv(i1,ndf*8,4,std=2,name='5_cel1')
+    i1 = concat_diff(i1)
+    i1 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel1')(i1)
+    i2 = conv(i2,ndf*8,4,std=2,name='5_cel2')
+    i2 = concat_diff(i2)
+    i2 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel2')(i2)
+    i3 = conv(i3,ndf*8,4,std=2,name='5_cel3')
+    i3 = concat_diff(i3)
+    i3 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel3')(i3)
+    i4 = conv(i4,ndf*8,4,std=2,name='5_cel4')
+    i4 = concat_diff(i4)
+    i4 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel4')(i4)
+    i = Concatenate()([i0,i1,i2,i3,i4])
+    i = concat_diff(i)
+    i = Flatten()(i)
+    i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='dense1')(i)
+    i = Activation('relu',name='relu_dens1')(i)
+    # i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='dense2')(i)
+    # i = Activation('relu',name='relu_dens2')(i)
+    i = Dense(num_classes, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='last_dense')(i)
+    predictions=Activation('sigmoid')(i)
+    model = Model(inputs=inp, outputs=predictions)  
 
     return model
 	
@@ -731,107 +729,6 @@ model = gan_dis_model_cel()
 # model.layers[34].trainable = False
 
 # 4 and 5
-weights_conv4_cel0 = model0.layers[20].get_weights()
-weights_bn4_cel0 = model0.layers[21].get_weights()
-weights_conv4_cel1 = model1.layers[20].get_weights()
-weights_bn4_cel1 = model1.layers[21].get_weights()
-weights_conv4_cel2 = model2.layers[20].get_weights()
-weights_bn4_cel2 = model2.layers[21].get_weights()
-weights_conv4_cel3 = model3.layers[20].get_weights()
-weights_bn4_cel3 = model3.layers[21].get_weights()
-weights_conv4_cel4 = model4.layers[20].get_weights()
-weights_bn4_cel4 = model4.layers[21].get_weights()
-
-model.layers[20].set_weights(weights_conv4_cel0)
-model.layers[21].set_weights(weights_conv4_cel1)
-model.layers[22].set_weights(weights_conv4_cel2)
-model.layers[23].set_weights(weights_conv4_cel3)
-model.layers[24].set_weights(weights_conv4_cel4)
-model.layers[25].set_weights(weights_bn4_cel0)
-model.layers[26].set_weights(weights_bn4_cel1)
-model.layers[27].set_weights(weights_bn4_cel2)
-model.layers[28].set_weights(weights_bn4_cel3)
-model.layers[29].set_weights(weights_bn4_cel4)
-
-model.layers[20].trainable = False
-model.layers[21].trainable = False
-model.layers[22].trainable = False
-model.layers[23].trainable = False
-model.layers[24].trainable = False
-model.layers[25].trainable = False
-model.layers[26].trainable = False
-model.layers[27].trainable = False
-model.layers[28].trainable = False
-model.layers[29].trainable = False
-
-weights_conv5_cel0 = model0.layers[25].get_weights()
-weights_bn5_cel0 = model0.layers[26].get_weights()
-weights_conv5_cel1 = model1.layers[25].get_weights()
-weights_bn5_cel1 = model1.layers[26].get_weights()
-weights_conv5_cel2 = model2.layers[25].get_weights()
-weights_bn5_cel2 = model2.layers[26].get_weights()
-weights_conv5_cel3 = model3.layers[25].get_weights()
-weights_bn5_cel3 = model3.layers[26].get_weights()
-weights_conv5_cel4 = model4.layers[25].get_weights()
-weights_bn5_cel4 = model4.layers[26].get_weights()
-
-model.layers[45].set_weights(weights_conv5_cel0)
-model.layers[46].set_weights(weights_conv5_cel1)
-model.layers[47].set_weights(weights_conv5_cel2)
-model.layers[48].set_weights(weights_conv5_cel3)
-model.layers[49].set_weights(weights_conv5_cel4)
-model.layers[50].set_weights(weights_bn5_cel0)
-model.layers[51].set_weights(weights_bn5_cel1)
-model.layers[52].set_weights(weights_bn5_cel2)
-model.layers[53].set_weights(weights_bn5_cel3)
-model.layers[54].set_weights(weights_bn5_cel4)
-
-model.layers[45].trainable = False
-model.layers[46].trainable = False
-model.layers[47].trainable = False
-model.layers[48].trainable = False
-model.layers[49].trainable = False
-model.layers[50].trainable = False
-model.layers[51].trainable = False
-model.layers[52].trainable = False
-model.layers[53].trainable = False
-model.layers[54].trainable = False
-
-
-# 3, 4, and 5
-# weights_conv3_cel0 = model0.layers[15].get_weights()
-# weights_bn3_cel0 = model0.layers[16].get_weights()
-# weights_conv3_cel1 = model1.layers[15].get_weights()
-# weights_bn3_cel1 = model1.layers[16].get_weights()
-# weights_conv3_cel2 = model2.layers[15].get_weights()
-# weights_bn3_cel2 = model2.layers[16].get_weights()
-# weights_conv3_cel3 = model3.layers[15].get_weights()
-# weights_bn3_cel3 = model3.layers[16].get_weights()
-# weights_conv3_cel4 = model4.layers[15].get_weights()
-# weights_bn3_cel4 = model4.layers[16].get_weights()
-
-# model.layers[15].set_weights(weights_conv3_cel0)
-# model.layers[16].set_weights(weights_conv3_cel1)
-# model.layers[17].set_weights(weights_conv3_cel2)
-# model.layers[18].set_weights(weights_conv3_cel3)
-# model.layers[19].set_weights(weights_conv3_cel4)
-# model.layers[20].set_weights(weights_bn3_cel0)
-# model.layers[21].set_weights(weights_bn3_cel1)
-# model.layers[22].set_weights(weights_bn3_cel2)
-# model.layers[23].set_weights(weights_bn3_cel3)
-# model.layers[24].set_weights(weights_bn3_cel4)
-
-# model.layers[15].trainable = False
-# model.layers[16].trainable = False
-# model.layers[17].trainable = False
-# model.layers[18].trainable = False
-# model.layers[19].trainable = False
-# model.layers[20].trainable = False
-# model.layers[21].trainable = False
-# model.layers[22].trainable = False
-# model.layers[23].trainable = False
-# model.layers[24].trainable = False
-
 # weights_conv4_cel0 = model0.layers[20].get_weights()
 # weights_bn4_cel0 = model0.layers[21].get_weights()
 # weights_conv4_cel1 = model1.layers[20].get_weights()
@@ -843,27 +740,27 @@ model.layers[54].trainable = False
 # weights_conv4_cel4 = model4.layers[20].get_weights()
 # weights_bn4_cel4 = model4.layers[21].get_weights()
 
-# model.layers[33].set_weights(weights_conv4_cel0)
-# model.layers[34].set_weights(weights_conv4_cel1)
-# model.layers[35].set_weights(weights_conv4_cel2)
-# model.layers[36].set_weights(weights_conv4_cel3)
-# model.layers[37].set_weights(weights_conv4_cel4)
-# model.layers[38].set_weights(weights_bn4_cel0)
-# model.layers[39].set_weights(weights_bn4_cel1)
-# model.layers[40].set_weights(weights_bn4_cel2)
-# model.layers[41].set_weights(weights_bn4_cel3)
-# model.layers[42].set_weights(weights_bn4_cel4)
+# model.layers[20].set_weights(weights_conv4_cel0)
+# model.layers[21].set_weights(weights_conv4_cel1)
+# model.layers[22].set_weights(weights_conv4_cel2)
+# model.layers[23].set_weights(weights_conv4_cel3)
+# model.layers[24].set_weights(weights_conv4_cel4)
+# model.layers[25].set_weights(weights_bn4_cel0)
+# model.layers[26].set_weights(weights_bn4_cel1)
+# model.layers[27].set_weights(weights_bn4_cel2)
+# model.layers[28].set_weights(weights_bn4_cel3)
+# model.layers[29].set_weights(weights_bn4_cel4)
 
-# model.layers[33].trainable = False
-# model.layers[34].trainable = False
-# model.layers[35].trainable = False
-# model.layers[36].trainable = False
-# model.layers[37].trainable = False
-# model.layers[38].trainable = False
-# model.layers[39].trainable = False
-# model.layers[40].trainable = False
-# model.layers[41].trainable = False
-# model.layers[42].trainable = False
+# model.layers[20].trainable = False
+# model.layers[21].trainable = False
+# model.layers[22].trainable = False
+# model.layers[23].trainable = False
+# model.layers[24].trainable = False
+# model.layers[25].trainable = False
+# model.layers[26].trainable = False
+# model.layers[27].trainable = False
+# model.layers[28].trainable = False
+# model.layers[29].trainable = False
 
 # weights_conv5_cel0 = model0.layers[25].get_weights()
 # weights_bn5_cel0 = model0.layers[26].get_weights()
@@ -876,29 +773,130 @@ model.layers[54].trainable = False
 # weights_conv5_cel4 = model4.layers[25].get_weights()
 # weights_bn5_cel4 = model4.layers[26].get_weights()
 
-# model.layers[51].set_weights(weights_conv5_cel0)
-# model.layers[52].set_weights(weights_conv5_cel1)
-# model.layers[53].set_weights(weights_conv5_cel2)
-# model.layers[54].set_weights(weights_conv5_cel3)
-# model.layers[55].set_weights(weights_conv5_cel4)
-# model.layers[56].set_weights(weights_bn5_cel0)
-# model.layers[57].set_weights(weights_bn5_cel1)
-# model.layers[58].set_weights(weights_bn5_cel2)
-# model.layers[59].set_weights(weights_bn5_cel3)
-# model.layers[60].set_weights(weights_bn5_cel4)
+# model.layers[45].set_weights(weights_conv5_cel0)
+# model.layers[46].set_weights(weights_conv5_cel1)
+# model.layers[47].set_weights(weights_conv5_cel2)
+# model.layers[48].set_weights(weights_conv5_cel3)
+# model.layers[49].set_weights(weights_conv5_cel4)
+# model.layers[50].set_weights(weights_bn5_cel0)
+# model.layers[51].set_weights(weights_bn5_cel1)
+# model.layers[52].set_weights(weights_bn5_cel2)
+# model.layers[53].set_weights(weights_bn5_cel3)
+# model.layers[54].set_weights(weights_bn5_cel4)
 
+# model.layers[45].trainable = False
+# model.layers[46].trainable = False
+# model.layers[47].trainable = False
+# model.layers[48].trainable = False
+# model.layers[49].trainable = False
+# model.layers[50].trainable = False
 # model.layers[51].trainable = False
 # model.layers[52].trainable = False
 # model.layers[53].trainable = False
 # model.layers[54].trainable = False
-# model.layers[55].trainable = False
-# model.layers[56].trainable = False
-# model.layers[57].trainable = False
-# model.layers[58].trainable = False
-# model.layers[59].trainable = False
-# model.layers[60].trainable = False
 
-model = gan_dis_model()
+
+# 3, 4, and 5
+weights_conv3_cel0 = model0.layers[15].get_weights()
+weights_bn3_cel0 = model0.layers[16].get_weights()
+weights_conv3_cel1 = model1.layers[15].get_weights()
+weights_bn3_cel1 = model1.layers[16].get_weights()
+weights_conv3_cel2 = model2.layers[15].get_weights()
+weights_bn3_cel2 = model2.layers[16].get_weights()
+weights_conv3_cel3 = model3.layers[15].get_weights()
+weights_bn3_cel3 = model3.layers[16].get_weights()
+weights_conv3_cel4 = model4.layers[15].get_weights()
+weights_bn3_cel4 = model4.layers[16].get_weights()
+
+model.layers[15].set_weights(weights_conv3_cel0)
+model.layers[16].set_weights(weights_conv3_cel1)
+model.layers[17].set_weights(weights_conv3_cel2)
+model.layers[18].set_weights(weights_conv3_cel3)
+model.layers[19].set_weights(weights_conv3_cel4)
+model.layers[20].set_weights(weights_bn3_cel0)
+model.layers[21].set_weights(weights_bn3_cel1)
+model.layers[22].set_weights(weights_bn3_cel2)
+model.layers[23].set_weights(weights_bn3_cel3)
+model.layers[24].set_weights(weights_bn3_cel4)
+
+model.layers[15].trainable = False
+model.layers[16].trainable = False
+model.layers[17].trainable = False
+model.layers[18].trainable = False
+model.layers[19].trainable = False
+model.layers[20].trainable = False
+model.layers[21].trainable = False
+model.layers[22].trainable = False
+model.layers[23].trainable = False
+model.layers[24].trainable = False
+
+weights_conv4_cel0 = model0.layers[20].get_weights()
+weights_bn4_cel0 = model0.layers[21].get_weights()
+weights_conv4_cel1 = model1.layers[20].get_weights()
+weights_bn4_cel1 = model1.layers[21].get_weights()
+weights_conv4_cel2 = model2.layers[20].get_weights()
+weights_bn4_cel2 = model2.layers[21].get_weights()
+weights_conv4_cel3 = model3.layers[20].get_weights()
+weights_bn4_cel3 = model3.layers[21].get_weights()
+weights_conv4_cel4 = model4.layers[20].get_weights()
+weights_bn4_cel4 = model4.layers[21].get_weights()
+
+model.layers[40].set_weights(weights_conv4_cel0)
+model.layers[41].set_weights(weights_conv4_cel1)
+model.layers[42].set_weights(weights_conv4_cel2)
+model.layers[43].set_weights(weights_conv4_cel3)
+model.layers[44].set_weights(weights_conv4_cel4)
+model.layers[45].set_weights(weights_bn4_cel0)
+model.layers[46].set_weights(weights_bn4_cel1)
+model.layers[47].set_weights(weights_bn4_cel2)
+model.layers[48].set_weights(weights_bn4_cel3)
+model.layers[49].set_weights(weights_bn4_cel4)
+
+model.layers[40].trainable = False
+model.layers[41].trainable = False
+model.layers[42].trainable = False
+model.layers[43].trainable = False
+model.layers[44].trainable = False
+model.layers[45].trainable = False
+model.layers[46].trainable = False
+model.layers[47].trainable = False
+model.layers[48].trainable = False
+model.layers[49].trainable = False
+
+weights_conv5_cel0 = model0.layers[25].get_weights()
+weights_bn5_cel0 = model0.layers[26].get_weights()
+weights_conv5_cel1 = model1.layers[25].get_weights()
+weights_bn5_cel1 = model1.layers[26].get_weights()
+weights_conv5_cel2 = model2.layers[25].get_weights()
+weights_bn5_cel2 = model2.layers[26].get_weights()
+weights_conv5_cel3 = model3.layers[25].get_weights()
+weights_bn5_cel3 = model3.layers[26].get_weights()
+weights_conv5_cel4 = model4.layers[25].get_weights()
+weights_bn5_cel4 = model4.layers[26].get_weights()
+
+model.layers[65].set_weights(weights_conv5_cel0)
+model.layers[66].set_weights(weights_conv5_cel1)
+model.layers[67].set_weights(weights_conv5_cel2)
+model.layers[68].set_weights(weights_conv5_cel3)
+model.layers[69].set_weights(weights_conv5_cel4)
+model.layers[70].set_weights(weights_bn5_cel0)
+model.layers[71].set_weights(weights_bn5_cel1)
+model.layers[72].set_weights(weights_bn5_cel2)
+model.layers[73].set_weights(weights_bn5_cel3)
+model.layers[74].set_weights(weights_bn5_cel4)
+
+model.layers[65].trainable = False
+model.layers[66].trainable = False
+model.layers[67].trainable = False
+model.layers[68].trainable = False
+model.layers[69].trainable = False
+model.layers[70].trainable = False
+model.layers[71].trainable = False
+model.layers[72].trainable = False
+model.layers[73].trainable = False
+model.layers[74].trainable = False
+
+# model = gan_dis_model()
 #model = baseline_model_api(input_shape)
 model.summary()
 filepath="cnn_weights_best.hdf5"
@@ -941,10 +939,10 @@ callbacks_list = [checkpoint, csv_logger, tensorboard]
 batch_size=256
 result = model.fit_generator(hdf5_generator('CelebA','train_cls5'),122077//batch_size,1000,initial_epoch=0,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=15138//batch_size,callbacks=callbacks_list)
 
-## Final evaluation of the model with generator
+# Final evaluation of the model with generator
 scores = model.evaluate_generator(hdf5_generator('CelebA','test_cls5'),74)
 print("Baseline Error: %.2f%%" % (100-scores[1]*100))
-prediction=model.predict_generator(hdf5_generator('CelebA','test_cls5'), 74)
+# prediction=model.predict_generator(hdf5_generator('CelebA','test_cls5'), 74)
 
 
 # IPython.embed()
