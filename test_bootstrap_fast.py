@@ -1,40 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Sep 21 14:03:53 2017
-
-@author: wawan
-"""
-
 import IPython
 import h5py
 import numpy as np
 from keras.utils.io_utils import HDF5Matrix
 
 train=h5py.File('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_train_5cls.hdf5','r')
-valid=h5py.File('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5','r')
-test=h5py.File('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_test_5cls.hdf5','r')
-#alldata=h5py.File('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5','r')
 
-
-ftrain = h5py.File("celeba_aligned_cropped_train_5cls_bootstrap4.hdf5", "w")
 cls4_train=train['targets'][:,4]==1  
 icls_train=np.where(cls4_train)[0]
-
-# IPython.embed()
-
-ftrain.create_dataset("features", (icls_train.shape[0],218,178,3), dtype='f')
-ftrain.create_dataset("targets", (icls_train.shape[0],5), dtype='f')
-
-
-print('Generate train features 4')
-for i in range(icls_train.shape[0]):                                     
-   ftrain['features'][i]=train['features'][icls_train[i],:,:,:]
-   
-print('Generate train targets 4')
-for i in range(icls_train.shape[0]):                                     
-   ftrain['targets'][i]=train['targets'][icls_train[i],0:5]  
-
-ftrain.close()
+train['targets'][icls_train[i],0:5]  
+IPython.embed()
 # ------------------------------------------------------------------------------------------------------------------
 # ftrain = h5py.File("celeba_aligned_cropped_train_5cls_bootstrap2.hdf5", "w")  
 # cls2_train=train['targets'][:,2]==1  
