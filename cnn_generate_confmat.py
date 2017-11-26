@@ -49,6 +49,7 @@ from keras import metrics, losses, regularizers
 #sess = K.get_session()
 #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
 #K.set_session(sess)
+reg_val = 1e-5
 
 def normalize_pixel(data):
     return data/255-.5
@@ -179,264 +180,11 @@ def load_data_attr(dataset):
         
     return num_classes, input_shape
 
-# load data CelebA
-#f=h5py.File('../../data/CelebAHDF5/celeba_aligned_cropped.hdf5','r')
-#X_train=f['features'][0:1000]
-#X_test=f['features'][1000:1100]
-#y_train=f['targets'][0:1000]
-#y_test=f['targets'][1000:1100]
-#
-#
-## normalize inputs from 0-255 to 0-1
-#X_train = X_train / 255
-#X_test = X_test / 255
-#num_classes = y_test.shape[1]
-
 def concat_diff(i): # batch discrimination -  increase generation diversity.
     # return i
     bv = Lambda(lambda i:K.mean(K.abs(i[:] - K.mean(i,axis=0)),axis=-1,keepdims=True))(i)
     i = Concatenate()([i,bv])
     return i
-    
-def baseline_model():
-	# create model
-	model = Sequential()
-	model.add(Conv2D(32, (5, 5), input_shape=(28, 28, 1), activation='relu'))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
-	model.add(Dropout(0.2))
-	model.add(Flatten())
-	model.add(Dense(128, activation='relu'))
-	model.add(Dense(num_classes, activation='softmax'))
-	# Compile model
-#	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-	return model
- 
-def baseline_model_api(input_shape):
-    inputs = Input(shape=input_shape)
-    x=Conv2D (32, (5, 5))(inputs)
-    x=Activation('relu')(x)
-    x=MaxPooling2D(pool_size=(2, 2))(x)
-    x=Dropout(0.2)(x)
-    x=Flatten()(x)
-    x=Dense(128)(x)
-    x=Activation('relu')(x)
-    x=Dense(num_classes)(x)
-    predictions=Activation('softmax')(x)
-    model = Model(inputs=inputs, outputs=predictions)    
-#    model.compile(optimizer='adam',
-#              loss='categorical_crossentropy',
-#              metrics=['accuracy'])
-    return model
-
-def Xception(include_top=True, weights='imagenet',
-             input_tensor=None, input_shape=None,
-             pooling=None,
-             classes=10):
-    """Instantiates the Xception architecture.
-    Optionally loads weights pre-trained
-    on ImageNet. This model is available for TensorFlow only,
-    and can only be used with inputs following the TensorFlow
-    data format `(width, height, channels)`.
-    You should set `image_data_format="channels_last"` in your Keras config
-    located at ~/.keras/keras.json.
-    Note that the default input image size for this model is 299x299.
-    # Arguments
-        include_top: whether to include the fully-connected
-            layer at the top of the network.
-        weights: one of `None` (random initialization)
-            or "imagenet" (pre-training on ImageNet).
-        input_tensor: optional Keras tensor (i.e. output of `layers.Input()`)
-            to use as image input for the model.
-        input_shape: optional shape tuple, only to be specified
-            if `include_top` is False (otherwise the input shape
-            has to be `(299, 299, 3)`.
-            It should have exactly 3 inputs channels,
-            and width and height should be no smaller than 71.
-            E.g. `(150, 150, 3)` would be one valid value.
-        pooling: Optional pooling mode for feature extraction
-            when `include_top` is `False`.
-            - `None` means that the output of the model will be
-                the 4D tensor output of the
-                last convolutional layer.
-            - `avg` means that global average pooling
-                will be applied to the output of the
-                last convolutional layer, and thus
-                the output of the model will be a 2D tensor.
-            - `max` means that global max pooling will
-                be applied.
-        classes: optional number of classes to classify images
-            into, only to be specified if `include_top` is True, and
-            if no `weights` argument is specified.
-    # Returns
-        A Keras model instance.
-    # Raises
-        ValueError: in case of invalid argument for `weights`,
-            or invalid input shape.
-        RuntimeError: If attempting to run this model with a
-            backend that does not support separable convolutions.
-    """
-    if weights not in {'imagenet', None}:
-        raise ValueError('The `weights` argument should be either '
-                         '`None` (random initialization) or `imagenet` '
-                         '(pre-training on ImageNet).')
-
-    if weights == 'imagenet' and include_top and classes != 1000:
-        raise ValueError('If using `weights` as imagenet with `include_top`'
-                         ' as true, `classes` should be 1000')
-
-    if K.backend() != 'tensorflow':
-        raise RuntimeError('The Xception model is only available with '
-                           'the TensorFlow backend.')
-    if K.image_data_format() != 'channels_last':
-        warnings.warn('The Xception model is only available for the '
-                      'input data format "channels_last" '
-                      '(width, height, channels). '
-                      'However your settings specify the default '
-                      'data format "channels_first" (channels, width, height). '
-                      'You should set `image_data_format="channels_last"` in your Keras '
-                      'config located at ~/.keras/keras.json. '
-                      'The model being returned right now will expect inputs '
-                      'to follow the "channels_last" data format.')
-        K.set_image_data_format('channels_last')
-        old_data_format = 'channels_first'
-    else:
-        old_data_format = None
-
-    # Determine proper input shape
-#    input_shape = _obtain_input_shape(input_shape,
-#                                      default_size=299,
-#                                      min_size=71,
-#                                      data_format=K.image_data_format(),
-#                                      require_flatten=False,
-#                                      weights=weights)
-
-    if input_tensor is None:
-        img_input = Input(shape=input_shape)
-    else:
-        if not K.is_keras_tensor(input_tensor):
-            img_input = Input(tensor=input_tensor, shape=input_shape)
-        else:
-            img_input = input_tensor
-
-    x = Conv2D(32, (3, 3), strides=(2, 2), use_bias=False, name='block1_conv1')(img_input)
-    x = BatchNormalization(name='block1_conv1_bn')(x)
-    x = Activation('relu', name='block1_conv1_act')(x)
-    x = Conv2D(64, (3, 3), use_bias=False, name='block1_conv2')(x)
-    x = BatchNormalization(name='block1_conv2_bn')(x)
-    x = Activation('relu', name='block1_conv2_act')(x)
-
-    residual = Conv2D(128, (1, 1), strides=(2, 2),
-                      padding='same', use_bias=False)(x)
-    residual = BatchNormalization()(residual)
-
-    x = SeparableConv2D(128, (3, 3), padding='same', use_bias=False, name='block2_sepconv1')(x)
-    x = BatchNormalization(name='block2_sepconv1_bn')(x)
-    x = Activation('relu', name='block2_sepconv2_act')(x)
-    x = SeparableConv2D(128, (3, 3), padding='same', use_bias=False, name='block2_sepconv2')(x)
-    x = BatchNormalization(name='block2_sepconv2_bn')(x)
-
-    x = MaxPooling2D((3, 3), strides=(2, 2), padding='same', name='block2_pool')(x)
-    x = layers.add([x, residual])
-
-    residual = Conv2D(256, (1, 1), strides=(2, 2),
-                      padding='same', use_bias=False)(x)
-    residual = BatchNormalization()(residual)
-
-    x = Activation('relu', name='block3_sepconv1_act')(x)
-    x = SeparableConv2D(256, (3, 3), padding='same', use_bias=False, name='block3_sepconv1')(x)
-    x = BatchNormalization(name='block3_sepconv1_bn')(x)
-    x = Activation('relu', name='block3_sepconv2_act')(x)
-    x = SeparableConv2D(256, (3, 3), padding='same', use_bias=False, name='block3_sepconv2')(x)
-    x = BatchNormalization(name='block3_sepconv2_bn')(x)
-
-    x = MaxPooling2D((3, 3), strides=(2, 2), padding='same', name='block3_pool')(x)
-    x = layers.add([x, residual])
-
-    residual = Conv2D(728, (1, 1), strides=(2, 2),
-                      padding='same', use_bias=False)(x)
-    residual = BatchNormalization()(residual)
-
-    x = Activation('relu', name='block4_sepconv1_act')(x)
-    x = SeparableConv2D(728, (3, 3), padding='same', use_bias=False, name='block4_sepconv1')(x)
-    x = BatchNormalization(name='block4_sepconv1_bn')(x)
-    x = Activation('relu', name='block4_sepconv2_act')(x)
-    x = SeparableConv2D(728, (3, 3), padding='same', use_bias=False, name='block4_sepconv2')(x)
-    x = BatchNormalization(name='block4_sepconv2_bn')(x)
-
-    x = MaxPooling2D((3, 3), strides=(2, 2), padding='same', name='block4_pool')(x)
-    x = layers.add([x, residual])
-
-    for i in range(8):
-        residual = x
-        prefix = 'block' + str(i + 5)
-
-        x = Activation('relu', name=prefix + '_sepconv1_act')(x)
-        x = SeparableConv2D(728, (3, 3), padding='same', use_bias=False, name=prefix + '_sepconv1')(x)
-        x = BatchNormalization(name=prefix + '_sepconv1_bn')(x)
-        x = Activation('relu', name=prefix + '_sepconv2_act')(x)
-        x = SeparableConv2D(728, (3, 3), padding='same', use_bias=False, name=prefix + '_sepconv2')(x)
-        x = BatchNormalization(name=prefix + '_sepconv2_bn')(x)
-        x = Activation('relu', name=prefix + '_sepconv3_act')(x)
-        x = SeparableConv2D(728, (3, 3), padding='same', use_bias=False, name=prefix + '_sepconv3')(x)
-        x = BatchNormalization(name=prefix + '_sepconv3_bn')(x)
-
-        x = layers.add([x, residual])
-
-    residual = Conv2D(1024, (1, 1), strides=(2, 2),
-                      padding='same', use_bias=False)(x)
-    residual = BatchNormalization()(residual)
-
-    x = Activation('relu', name='block13_sepconv1_act')(x)
-    x = SeparableConv2D(728, (3, 3), padding='same', use_bias=False, name='block13_sepconv1')(x)
-    x = BatchNormalization(name='block13_sepconv1_bn')(x)
-    x = Activation('relu', name='block13_sepconv2_act')(x)
-    x = SeparableConv2D(1024, (3, 3), padding='same', use_bias=False, name='block13_sepconv2')(x)
-    x = BatchNormalization(name='block13_sepconv2_bn')(x)
-
-    x = MaxPooling2D((3, 3), strides=(2, 2), padding='same', name='block13_pool')(x)
-    x = layers.add([x, residual])
-
-    x = SeparableConv2D(1536, (3, 3), padding='same', use_bias=False, name='block14_sepconv1')(x)
-    x = BatchNormalization(name='block14_sepconv1_bn')(x)
-    x = Activation('relu', name='block14_sepconv1_act')(x)
-
-    x = SeparableConv2D(2048, (3, 3), padding='same', use_bias=False, name='block14_sepconv2')(x)
-    x = BatchNormalization(name='block14_sepconv2_bn')(x)
-    x = Activation('relu', name='block14_sepconv2_act')(x)
-
-    if include_top:
-        x = GlobalAveragePooling2D(name='avg_pool')(x)
-        x = Dense(classes, activation='softmax', name='predictions')(x)
-    else:
-        if pooling == 'avg':
-            x = GlobalAveragePooling2D()(x)
-        elif pooling == 'max':
-            x = GlobalMaxPooling2D()(x)
-
-    # Ensure that the model takes into account
-    # any potential predecessors of `input_tensor`.
-    if input_tensor is not None:
-        inputs = get_source_inputs(input_tensor)
-    else:
-        inputs = img_input
-    # Create model.
-    model = Model(inputs, x, name='xception')
-
-    # load weights
-    if weights == 'imagenet':
-        if include_top:
-            weights_path = get_file('xception_weights_tf_dim_ordering_tf_kernels.h5',
-                                    TF_WEIGHTS_PATH,
-                                    cache_subdir='models')
-        else:
-            weights_path = get_file('xception_weights_tf_dim_ordering_tf_kernels_notop.h5',
-                                    TF_WEIGHTS_PATH_NO_TOP,
-                                    cache_subdir='models')
-        model.load_weights(weights_path)
-
-    if old_data_format:
-        K.set_image_data_format(old_data_format)
-    return model
 
 def gan_dis_model_original():
     inp = Input(shape=(218,178,3))
@@ -518,40 +266,13 @@ def gan_dis_model_cel():
     ndf=24
     
     def conv(i,nop,kw,std=1,usebn=True,bm='same',name=''):
-        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='random_uniform',name='conv'+name)(i)
+        i = Conv2D(nop,kernel_size=(kw,kw),padding=bm,strides=(std,std), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv'+name)(i)
         if usebn:
             i = BatchNormalization(name='bn'+name)(i)
         i = Activation('relu',name='relu'+name)(i)
         return i
     
     # only 5
-    # i = conv(i,ndf*1,4,std=2,name='0',usebn=False)
-    # i = concat_diff(i)
-    # i = conv(i,ndf*2,4,std=2,name='1')
-    # i = concat_diff(i)
-    # i = conv(i,ndf*4,4,std=2,name='2')
-    # i = concat_diff(i)
-    # i = conv(i,ndf*8,4,std=2,name='3')
-    # i = concat_diff(i)
-    # i = conv(i,ndf*8,4,std=2,name='4')
-    # i = concat_diff(i)
-    # i0 = conv(i,ndf*8,4,std=2,name='5_cel0')
-    # i1 = conv(i,ndf*8,4,std=2,name='5_cel1')
-    # i2 = conv(i,ndf*8,4,std=2,name='5_cel2')
-    # i3 = conv(i,ndf*8,4,std=2,name='5_cel3')
-    # i4 = conv(i,ndf*8,4,std=2,name='5_cel4')
-    # i = Average()([i0,i1,i2,i3,i4])
-    # i = concat_diff(i)
-    # i = Flatten()(i)
-    # i = Dense(200)(i)
-    # i = Activation('relu',name='relu_dens1')(i)
-    # i = Dense(200)(i)
-    # i = Activation('relu',name='relu_dens2')(i)
-    # i = Dense(num_classes)(i)
-    # predictions=Activation('sigmoid')(i)
-    # model = Model(inputs=inp, outputs=predictions)  
-
-    # 4 and 5
     i = conv(i,ndf*1,4,std=2,name='0',usebn=False)
     i = concat_diff(i)
     i = conv(i,ndf*2,4,std=2,name='1')
@@ -560,28 +281,78 @@ def gan_dis_model_cel():
     i = concat_diff(i)
     i = conv(i,ndf*8,4,std=2,name='3')
     i = concat_diff(i)
-    i0 = conv(i,ndf*8,4,std=2,name='4_cel0')
-    i1 = conv(i,ndf*8,4,std=2,name='4_cel1')
-    i2 = conv(i,ndf*8,4,std=2,name='4_cel2')
-    i3 = conv(i,ndf*8,4,std=2,name='4_cel3')
-    i4 = conv(i,ndf*8,4,std=2,name='4_cel4')
-    i = Average()([i0,i1,i2,i3,i4])
-    i = concat_diff(i)
+    i = conv(i,ndf*8,4,std=2,name='4')
+    i = concat_diff(i)    
     i0 = conv(i,ndf*8,4,std=2,name='5_cel0')
+    i0 = concat_diff(i0)
+    i0 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel0')(i0)
     i1 = conv(i,ndf*8,4,std=2,name='5_cel1')
+    i1 = concat_diff(i1)
+    i1 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel1')(i1)
     i2 = conv(i,ndf*8,4,std=2,name='5_cel2')
+    i2 = concat_diff(i2)
+    i2 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel2')(i2)
     i3 = conv(i,ndf*8,4,std=2,name='5_cel3')
+    i3 = concat_diff(i3)
+    i3 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel3')(i3)
     i4 = conv(i,ndf*8,4,std=2,name='5_cel4')
-    i = Average()([i0,i1,i2,i3,i4])
+    i4 = concat_diff(i4)
+    i4 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel4')(i4)
+    i = Concatenate()([i0,i1,i2,i3,i4])
     i = concat_diff(i)
-    i=Flatten()(i)
-    i = Dense(200)(i)
+    i = Flatten()(i)
+    i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='dense1')(i)
     i = Activation('relu',name='relu_dens1')(i)
-    # i = Dense(200)(i)
+    # i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='dense2')(i)
     # i = Activation('relu',name='relu_dens2')(i)
-    i = Dense(num_classes)(i)
+    i = Dense(num_classes, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='last_dense')(i)
     predictions=Activation('sigmoid')(i)
     model = Model(inputs=inp, outputs=predictions)  
+
+    # 4 and 5
+    # i = conv(i,ndf*1,4,std=2,name='0',usebn=False)
+    # i = concat_diff(i)
+    # i = conv(i,ndf*2,4,std=2,name='1')
+    # i = concat_diff(i)
+    # i = conv(i,ndf*4,4,std=2,name='2')
+    # i = concat_diff(i)
+    # i = conv(i,ndf*8,4,std=2,name='3')
+    # i = concat_diff(i)
+    # i0 = conv(i,ndf*8,4,std=2,name='4_cel0')
+    # i0 = concat_diff(i0)
+    # i1 = conv(i,ndf*8,4,std=2,name='4_cel1')
+    # i1 = concat_diff(i1)
+    # i2 = conv(i,ndf*8,4,std=2,name='4_cel2')
+    # i2 = concat_diff(i2)
+    # i3 = conv(i,ndf*8,4,std=2,name='4_cel3')
+    # i3 = concat_diff(i3)
+    # i4 = conv(i,ndf*8,4,std=2,name='4_cel4')
+    # i4 = concat_diff(i4)
+    # i0 = conv(i0,ndf*8,4,std=2,name='5_cel0')
+    # i0 = concat_diff(i0)
+    # i0 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel0')(i0)
+    # i1 = conv(i1,ndf*8,4,std=2,name='5_cel1')
+    # i1 = concat_diff(i1)
+    # i1 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel1')(i1)
+    # i2 = conv(i2,ndf*8,4,std=2,name='5_cel2')
+    # i2 = concat_diff(i2)
+    # i2 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel2')(i2)
+    # i3 = conv(i3,ndf*8,4,std=2,name='5_cel3')
+    # i3 = concat_diff(i3)
+    # i3 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel3')(i3)
+    # i4 = conv(i4,ndf*8,4,std=2,name='5_cel4')
+    # i4 = concat_diff(i4)
+    # i4 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel4')(i4)
+    # i = Concatenate()([i0,i1,i2,i3,i4])
+    # i = concat_diff(i)
+    # i = Flatten()(i)
+    # i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='dense1')(i)
+    # i = Activation('relu',name='relu_dens1')(i)
+    # # i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='dense2')(i)
+    # # i = Activation('relu',name='relu_dens2')(i)
+    # i = Dense(num_classes, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='last_dense')(i)
+    # predictions=Activation('sigmoid')(i)
+    # model = Model(inputs=inp, outputs=predictions)  
     
     # 3, 4, and 5
     # i = conv(i,ndf*1,4,std=2,name='0',usebn=False)
@@ -591,267 +362,63 @@ def gan_dis_model_cel():
     # i = conv(i,ndf*4,4,std=2,name='2')
     # i = concat_diff(i)
     # i0 = conv(i,ndf*8,4,std=2,name='3_cel0')
+    # i0 = concat_diff(i0)
     # i1 = conv(i,ndf*8,4,std=2,name='3_cel1')
+    # i1 = concat_diff(i1)
     # i2 = conv(i,ndf*8,4,std=2,name='3_cel2')
+    # i2 = concat_diff(i2)
     # i3 = conv(i,ndf*8,4,std=2,name='3_cel3')
+    # i3 = concat_diff(i3)
     # i4 = conv(i,ndf*8,4,std=2,name='3_cel4')
-    # i = Average()([i0,i1,i2,i3,i4])
+    # i4 = concat_diff(i4)
+    # i0 = conv(i0,ndf*8,4,std=2,name='4_cel0')
+    # i0 = concat_diff(i0)
+    # i1 = conv(i1,ndf*8,4,std=2,name='4_cel1')
+    # i1 = concat_diff(i1)
+    # i2 = conv(i2,ndf*8,4,std=2,name='4_cel2')
+    # i2 = concat_diff(i2)
+    # i3 = conv(i3,ndf*8,4,std=2,name='4_cel3')
+    # i3 = concat_diff(i3)
+    # i4 = conv(i4,ndf*8,4,std=2,name='4_cel4')
+    # i4 = concat_diff(i4)
+    # i0 = conv(i0,ndf*8,4,std=2,name='5_cel0')
+    # i0 = concat_diff(i0)
+    # i0 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel0')(i0)
+    # i1 = conv(i1,ndf*8,4,std=2,name='5_cel1')
+    # i1 = concat_diff(i1)
+    # i1 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel1')(i1)
+    # i2 = conv(i2,ndf*8,4,std=2,name='5_cel2')
+    # i2 = concat_diff(i2)
+    # i2 = Conv2D(38,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel2')(i2)
+    # i3 = conv(i3,ndf*8,4,std=2,name='5_cel3')
+    # i3 = concat_diff(i3)
+    # i3 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel3')(i3)
+    # i4 = conv(i4,ndf*8,4,std=2,name='5_cel4')
+    # i4 = concat_diff(i4)
+    # i4 = Conv2D(39,kernel_size=(1,1),padding='valid',strides=(1,1), kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='conv5.5_cel4')(i4)
+    # i = Concatenate()([i0,i1,i2,i3,i4])
     # i = concat_diff(i)
-    # i0 = conv(i,ndf*8,4,std=2,name='4_cel0')
-    # i1 = conv(i,ndf*8,4,std=2,name='4_cel1')
-    # i2 = conv(i,ndf*8,4,std=2,name='4_cel2')
-    # i3 = conv(i,ndf*8,4,std=2,name='4_cel3')
-    # i4 = conv(i,ndf*8,4,std=2,name='4_cel4')
-    # i = Average()([i0,i1,i2,i3,i4])
-    # i = concat_diff(i)
-    # i0 = conv(i,ndf*8,4,std=2,name='5_cel0')
-    # i1 = conv(i,ndf*8,4,std=2,name='5_cel1')
-    # i2 = conv(i,ndf*8,4,std=2,name='5_cel2')
-    # i3 = conv(i,ndf*8,4,std=2,name='5_cel3')
-    # i4 = conv(i,ndf*8,4,std=2,name='5_cel4')
-    # i = Average()([i0,i1,i2,i3,i4])
-    # i = concat_diff(i)
-    # i=Flatten()(i)
-    # i=Dense(num_classes)(i)
+    # i = Flatten()(i)
+    # i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='dense1')(i)
+    # i = Activation('relu',name='relu_dens1')(i)
+    # # i = Dense(200, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='dense2')(i)
+    # # i = Activation('relu',name='relu_dens2')(i)
+    # i = Dense(num_classes, kernel_initializer='he_uniform', kernel_regularizer=regularizers.l2(reg_val), bias_regularizer=regularizers.l2(reg_val),name='last_dense')(i)
     # predictions=Activation('sigmoid')(i)
     # model = Model(inputs=inp, outputs=predictions)  
 
     return model
-	
+
 # fix random seed for reproducibility
 seed = 7
 numpy.random.seed(seed)
-#X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5', 'features', normalizer=normalize_pixel) 
-#IPython.embed()
 
 #(X_train, y_train), (X_val, y_val), (X_test, y_test), num_classes, input_shape = load_data('CelebAHDF5')
 num_classes, input_shape = load_data_attr('CelebA_cls5')
 # build the model
-#model = Xception(include_top=True, weights=None, input_shape=input_shape, classes=num_classes)
-
-#fce-gan
-# model0 = gan_dis_model_original()
-# model0.load_weights('/home/wawan/git/fce_gan/save/dm_fce_0.hdf5')
-
-# model1 = gan_dis_model_original()
-# model1.load_weights('/home/wawan/git/fce_gan/save/dm_fce_1.hdf5')
-
-# model2 = gan_dis_model_original()
-# model2.load_weights('/home/wawan/git/fce_gan/save/dm_fce_2.hdf5')
-
-# model3 = gan_dis_model_original()
-# model3.load_weights('/home/wawan/git/fce_gan/save/dm_fce_3.hdf5')
-
-# model4 = gan_dis_model_original()
-# model4.load_weights('/home/wawan/git/fce_gan/save/dm_fce_4.hdf5')
-
-# model = gan_dis_model_cel()
-# IPython.embed()
-
-# only 5
-# weights_conv5_cel0 = model0.layers[25].get_weights()
-# weights_bn5_cel0 = model0.layers[26].get_weights()
-# weights_conv5_cel1 = model1.layers[25].get_weights()
-# weights_bn5_cel1 = model1.layers[26].get_weights()
-# weights_conv5_cel2 = model2.layers[25].get_weights()
-# weights_bn5_cel2 = model2.layers[26].get_weights()
-# weights_conv5_cel3 = model3.layers[25].get_weights()
-# weights_bn5_cel3 = model3.layers[26].get_weights()
-# weights_conv5_cel4 = model4.layers[25].get_weights()
-# weights_bn5_cel4 = model4.layers[26].get_weights()
-
-# model.layers[25].set_weights(weights_conv5_cel0)
-# model.layers[26].set_weights(weights_conv5_cel1)
-# model.layers[27].set_weights(weights_conv5_cel2)
-# model.layers[28].set_weights(weights_conv5_cel3)
-# model.layers[29].set_weights(weights_conv5_cel4)
-
-# model.layers[30].set_weights(weights_bn5_cel0)
-# model.layers[31].set_weights(weights_bn5_cel1)
-# model.layers[32].set_weights(weights_bn5_cel2)
-# model.layers[33].set_weights(weights_bn5_cel3)
-# model.layers[34].set_weights(weights_bn5_cel4)
-
-# model.layers[25].trainable = False
-# model.layers[26].trainable = False
-# model.layers[27].trainable = False
-# model.layers[28].trainable = False
-# model.layers[29].trainable = False
-# model.layers[30].trainable = False
-# model.layers[31].trainable = False
-# model.layers[32].trainable = False
-# model.layers[33].trainable = False
-# model.layers[34].trainable = False
-
-# 4 and 5
-# weights_conv4_cel0 = model0.layers[20].get_weights()
-# weights_bn4_cel0 = model0.layers[21].get_weights()
-# weights_conv4_cel1 = model1.layers[20].get_weights()
-# weights_bn4_cel1 = model1.layers[21].get_weights()
-# weights_conv4_cel2 = model2.layers[20].get_weights()
-# weights_bn4_cel2 = model2.layers[21].get_weights()
-# weights_conv4_cel3 = model3.layers[20].get_weights()
-# weights_bn4_cel3 = model3.layers[21].get_weights()
-# weights_conv4_cel4 = model4.layers[20].get_weights()
-# weights_bn4_cel4 = model4.layers[21].get_weights()
-
-# model.layers[20].set_weights(weights_conv4_cel0)
-# model.layers[21].set_weights(weights_conv4_cel1)
-# model.layers[22].set_weights(weights_conv4_cel2)
-# model.layers[23].set_weights(weights_conv4_cel3)
-# model.layers[24].set_weights(weights_conv4_cel4)
-# model.layers[25].set_weights(weights_bn4_cel0)
-# model.layers[26].set_weights(weights_bn4_cel1)
-# model.layers[27].set_weights(weights_bn4_cel2)
-# model.layers[28].set_weights(weights_bn4_cel3)
-# model.layers[29].set_weights(weights_bn4_cel4)
-
-# model.layers[20].trainable = False
-# model.layers[21].trainable = False
-# model.layers[22].trainable = False
-# model.layers[23].trainable = False
-# model.layers[24].trainable = False
-# model.layers[25].trainable = False
-# model.layers[26].trainable = False
-# model.layers[27].trainable = False
-# model.layers[28].trainable = False
-# model.layers[29].trainable = False
-
-# weights_conv5_cel0 = model0.layers[25].get_weights()
-# weights_bn5_cel0 = model0.layers[26].get_weights()
-# weights_conv5_cel1 = model1.layers[25].get_weights()
-# weights_bn5_cel1 = model1.layers[26].get_weights()
-# weights_conv5_cel2 = model2.layers[25].get_weights()
-# weights_bn5_cel2 = model2.layers[26].get_weights()
-# weights_conv5_cel3 = model3.layers[25].get_weights()
-# weights_bn5_cel3 = model3.layers[26].get_weights()
-# weights_conv5_cel4 = model4.layers[25].get_weights()
-# weights_bn5_cel4 = model4.layers[26].get_weights()
-
-# model.layers[38].set_weights(weights_conv5_cel0)
-# model.layers[39].set_weights(weights_conv5_cel1)
-# model.layers[40].set_weights(weights_conv5_cel2)
-# model.layers[41].set_weights(weights_conv5_cel3)
-# model.layers[42].set_weights(weights_conv5_cel4)
-# model.layers[43].set_weights(weights_bn5_cel0)
-# model.layers[44].set_weights(weights_bn5_cel1)
-# model.layers[45].set_weights(weights_bn5_cel2)
-# model.layers[46].set_weights(weights_bn5_cel3)
-# model.layers[47].set_weights(weights_bn5_cel4)
-
-# model.layers[38].trainable = False
-# model.layers[39].trainable = False
-# model.layers[40].trainable = False
-# model.layers[41].trainable = False
-# model.layers[42].trainable = False
-# model.layers[43].trainable = False
-# model.layers[44].trainable = False
-# model.layers[45].trainable = False
-# model.layers[46].trainable = False
-# model.layers[47].trainable = False
-
-
-# 3, 4, and 5
-# weights_conv3_cel0 = model0.layers[15].get_weights()
-# weights_bn3_cel0 = model0.layers[16].get_weights()
-# weights_conv3_cel1 = model1.layers[15].get_weights()
-# weights_bn3_cel1 = model1.layers[16].get_weights()
-# weights_conv3_cel2 = model2.layers[15].get_weights()
-# weights_bn3_cel2 = model2.layers[16].get_weights()
-# weights_conv3_cel3 = model3.layers[15].get_weights()
-# weights_bn3_cel3 = model3.layers[16].get_weights()
-# weights_conv3_cel4 = model4.layers[15].get_weights()
-# weights_bn3_cel4 = model4.layers[16].get_weights()
-
-# model.layers[15].set_weights(weights_conv3_cel0)
-# model.layers[16].set_weights(weights_conv3_cel1)
-# model.layers[17].set_weights(weights_conv3_cel2)
-# model.layers[18].set_weights(weights_conv3_cel3)
-# model.layers[19].set_weights(weights_conv3_cel4)
-# model.layers[20].set_weights(weights_bn3_cel0)
-# model.layers[21].set_weights(weights_bn3_cel1)
-# model.layers[22].set_weights(weights_bn3_cel2)
-# model.layers[23].set_weights(weights_bn3_cel3)
-# model.layers[24].set_weights(weights_bn3_cel4)
-
-# model.layers[15].trainable = False
-# model.layers[16].trainable = False
-# model.layers[17].trainable = False
-# model.layers[18].trainable = False
-# model.layers[19].trainable = False
-# model.layers[20].trainable = False
-# model.layers[21].trainable = False
-# model.layers[22].trainable = False
-# model.layers[23].trainable = False
-# model.layers[24].trainable = False
-
-# weights_conv4_cel0 = model0.layers[20].get_weights()
-# weights_bn4_cel0 = model0.layers[21].get_weights()
-# weights_conv4_cel1 = model1.layers[20].get_weights()
-# weights_bn4_cel1 = model1.layers[21].get_weights()
-# weights_conv4_cel2 = model2.layers[20].get_weights()
-# weights_bn4_cel2 = model2.layers[21].get_weights()
-# weights_conv4_cel3 = model3.layers[20].get_weights()
-# weights_bn4_cel3 = model3.layers[21].get_weights()
-# weights_conv4_cel4 = model4.layers[20].get_weights()
-# weights_bn4_cel4 = model4.layers[21].get_weights()
-
-# model.layers[33].set_weights(weights_conv4_cel0)
-# model.layers[34].set_weights(weights_conv4_cel1)
-# model.layers[35].set_weights(weights_conv4_cel2)
-# model.layers[36].set_weights(weights_conv4_cel3)
-# model.layers[37].set_weights(weights_conv4_cel4)
-# model.layers[38].set_weights(weights_bn4_cel0)
-# model.layers[39].set_weights(weights_bn4_cel1)
-# model.layers[40].set_weights(weights_bn4_cel2)
-# model.layers[41].set_weights(weights_bn4_cel3)
-# model.layers[42].set_weights(weights_bn4_cel4)
-
-# model.layers[33].trainable = False
-# model.layers[34].trainable = False
-# model.layers[35].trainable = False
-# model.layers[36].trainable = False
-# model.layers[37].trainable = False
-# model.layers[38].trainable = False
-# model.layers[39].trainable = False
-# model.layers[40].trainable = False
-# model.layers[41].trainable = False
-# model.layers[42].trainable = False
-
-# weights_conv5_cel0 = model0.layers[25].get_weights()
-# weights_bn5_cel0 = model0.layers[26].get_weights()
-# weights_conv5_cel1 = model1.layers[25].get_weights()
-# weights_bn5_cel1 = model1.layers[26].get_weights()
-# weights_conv5_cel2 = model2.layers[25].get_weights()
-# weights_bn5_cel2 = model2.layers[26].get_weights()
-# weights_conv5_cel3 = model3.layers[25].get_weights()
-# weights_bn5_cel3 = model3.layers[26].get_weights()
-# weights_conv5_cel4 = model4.layers[25].get_weights()
-# weights_bn5_cel4 = model4.layers[26].get_weights()
-
-# model.layers[51].set_weights(weights_conv5_cel0)
-# model.layers[52].set_weights(weights_conv5_cel1)
-# model.layers[53].set_weights(weights_conv5_cel2)
-# model.layers[54].set_weights(weights_conv5_cel3)
-# model.layers[55].set_weights(weights_conv5_cel4)
-# model.layers[56].set_weights(weights_bn5_cel0)
-# model.layers[57].set_weights(weights_bn5_cel1)
-# model.layers[58].set_weights(weights_bn5_cel2)
-# model.layers[59].set_weights(weights_bn5_cel3)
-# model.layers[60].set_weights(weights_bn5_cel4)
-
-# model.layers[51].trainable = False
-# model.layers[52].trainable = False
-# model.layers[53].trainable = False
-# model.layers[54].trainable = False
-# model.layers[55].trainable = False
-# model.layers[56].trainable = False
-# model.layers[57].trainable = False
-# model.layers[58].trainable = False
-# model.layers[59].trainable = False
-# model.layers[60].trainable = False
 
 model = gan_dis_model()
+# model = gan_dis_model_cel()
 filepath="cnn_weights_best.hdf5"
 model.load_weights('/home/ubuntuone/Projects/fce_gan/save/cnn/normal_cnn_weights_best.hdf5')
 #model = baseline_model_api(input_shape)
