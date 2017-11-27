@@ -101,7 +101,6 @@ def load_bootstrap(train,icls,cnt4):
         icls=np.sort(icls)
 
     #sample 3
-    icls=np.sort(icls)
     cnt=np.where(train['targets'][icls.tolist()][:,3]==1)[0].shape[0]
     cls1_0=train['targets'][:,1]==0
     if cnt4-cnt>0:
@@ -117,12 +116,69 @@ def load_bootstrap(train,icls,cnt4):
         cls0_1=train['targets'][:,0]==1
         icls_sample=np.random.choice(np.where(np.logical_and.reduce((cls4_0, cls2_0, cls1_0, cls3_0, cls0_1)))[0],cnt4-cnt,replace=False)
         icls=np.concatenate((icls,icls_sample))
-        icls=np.sort(icls)
+        # icls=np.sort(icls)
 
-    X_data=train['features'][icls.tolist()]
-    y_data=train['targets'][icls.tolist()]
-    
-    return (X_data, y_data)
+    np.random.shuffle(icls)
+
+    return (icls)
+
+def hdf5_generator(dataset,set_type,indexes=None):
+    i=0    
+    # CelebA data size: train = 162770, valid = 19867, test = 19962
+    if dataset=='CelebA':    
+        if set_type=='train':
+            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train.hdf5', 'targets')
+            size = 162770        
+            
+        elif set_type=='valid':
+            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid.hdf5', 'targets')
+            size = 19867        
+            
+        elif set_type=='test':
+            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test.hdf5', 'targets')
+            size = 19962   
+            
+        if set_type=='train_cls5':
+            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train_5cls.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train_5cls.hdf5', 'targets')
+            size = 122077        
+            
+        elif set_type=='valid_cls5':
+            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'targets')
+            size = 15138        
+            
+        elif set_type=='test_cls5':
+            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test_5cls.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test_5cls.hdf5', 'targets')
+            size = 14724          
+            
+        elif set_type=='all':
+            X_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5', 'features', normalizer=normalize_pixel)
+            y_data = HDF5Matrix('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped.hdf5', 'targets')
+            size = 202599        
+                
+        elif set_type=='try':
+            X_data = HDF5Matrix('mytestfile.hdf5', 'features')
+            y_data = HDF5Matrix('mytestfile.hdf5', 'targets')    
+            size = 20     
+
+        if indexes is not None:
+            size = indexes.shape[0]
+                    
+        while 1:
+            if indexes is None:
+                X_single = X_data[i%size].reshape((1, 218, 178, 3))
+                y_single = y_data[i%size].reshape((1, 5))
+            else:
+                X_single = X_data[indexes[i%size]].reshape((1, 218, 178, 3))
+                y_single = y_data[indexes[i%size]].reshape((1, 5))
+
+            yield(X_single, y_single)
+            i+=1
 
 def concat_diff(i): # batch discrimination -  increase generation diversity.
     # return i
@@ -214,6 +270,7 @@ numpy.random.seed(seed)
 model = gan_dis_model()
 model.summary()
 filepath="cnn_weights_best.hdf5"
+filepath_routine="cnn_weights.hdf5"
 # model=load_model(filepath)
 # Compile model
 opt = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=1e-6)
@@ -222,9 +279,10 @@ model.compile(optimizer=opt,
           metrics=['accuracy'])
 
 checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+checkpoint_routine = ModelCheckpoint(filepath_routine, monitor='val_acc', verbose=1, save_best_only=False, mode='max')
 csv_logger = CSVLogger('training.log', append=True)
 tensorboard = TensorBoard(log_dir='./tf-logs')
-callbacks_list = [checkpoint, csv_logger, tensorboard]
+callbacks_list = [checkpoint, checkpoint_routine, csv_logger, tensorboard]
 
 # f=open("history.pickle","rb")
 # history = History()
@@ -242,23 +300,23 @@ cnt4=icls4.shape[0]
 
 print('start training')
 initial_epoch=0
-for i in range(1-initial_epoch):
-    # model=load_model(filepath)
-    print('epoch '+str(i+initial_epoch))
+for i in range(1000-initial_epoch):
+    if i!=0:
+        model=load_model(filepath_routine)
+    # print('epoch '+str(i+initial_epoch))
     
-    start = time.time()
-    (X_train, y_train)=load_bootstrap(train,icls4,cnt4)
-    end = time.time()
-    print('bootstrapping for '+str(end-start)+'s')
+    # start = time.time()
+    icls=load_bootstrap(train,icls4,cnt4)
+    # end = time.time()
+    # print('bootstrapping for '+str(end-start)+'s')
+
+    # IPython.embed()
+
+    history = model.fit_generator(hdf5_generator('CelebA','train_cls5',icls),icls.shape[0]//batch_size,i+1,initial_epoch=i,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=15138//batch_size,callbacks=callbacks_list)
 
 
-    start = time.time()
-    history=model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=1, initial_epoch=i+initial_epoch, batch_size=batch_size, callbacks=callbacks_list)
-    end = time.time()
-    print('fit for '+str(end-start)+'s')
-
-    callbacks_list = [checkpoint, csv_logger, tensorboard, history]
-    pickle.dump(history.history, f)
+    callbacks_list = [checkpoint, checkpoint_routine, csv_logger, tensorboard, history]
+    # pickle.dump(history.history, f)
 
 # Final evaluation of the model with generator
 # scores = model.evaluate_generator(hdf5_generator('CelebA','test_cls5'),74)
