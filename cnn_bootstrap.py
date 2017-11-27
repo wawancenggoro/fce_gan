@@ -27,7 +27,7 @@ from keras.layers import GlobalMaxPooling2D
 from keras.engine.topology import get_source_inputs
 from keras.utils.data_utils import get_file
 from keras import backend as K
-from keras.callbacks import TensorBoard, ModelCheckpoint, CSVLogger, EarlyStopping, LearningRateScheduler
+from keras.callbacks import TensorBoard, ModelCheckpoint, CSVLogger, EarlyStopping, LearningRateScheduler, History
 from keras.models import load_model
 
 
@@ -35,6 +35,7 @@ TF_WEIGHTS_PATH = 'https://github.com/fchollet/deep-learning-models/releases/dow
 TF_WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.4/xception_weights_tf_dim_ordering_tf_kernels_notop.h5'
 
 import numpy
+import numpy as np
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dropout
@@ -46,11 +47,14 @@ import h5py
 from keras.utils.io_utils import HDF5Matrix
 from tensorflow.python import debug as tf_debug
 from keras import metrics, losses, regularizers
+import pickle
+import time
 
 #sess = K.get_session()
 #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
 #K.set_session(sess)
 reg_val = 5e-6
+homepath = '/mnt/Storage'
 
 def normalize_pixel(data):
     return data/255-.5
@@ -58,10 +62,10 @@ def normalize_pixel(data):
 def load_data(dataset):
     if dataset=='CelebAHDF5_cls5_val':
         # load data CelebA
-        X_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'features', normalizer=normalize_pixel)
-        y_data = HDF5Matrix('/home/ubuntuone/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'targets')
+        X_data = HDF5Matrix(homepath+'/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'features', normalizer=normalize_pixel)
+        y_data = HDF5Matrix(homepath+'/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid_5cls.hdf5', 'targets')
         
-        num_classes = y_test.shape[1]
+        num_classes = y_data.shape[1]
         input_shape=(218, 178, 3)
     return (X_data, y_data), num_classes, input_shape
 
@@ -78,7 +82,46 @@ def load_data_attr(dataset):
         
     return num_classes, input_shape
 
-def load_bootstrap():
+def load_bootstrap(train,icls,cnt4):
+    cnt=np.where(train['targets'][icls.tolist()][:,2]==1)[0].shape[0]
+    cls4_0=train['targets'][:,4]==0
+    if cnt4-cnt>0:
+        cls2_1=train['targets'][:,2]==1
+        icls_sample=np.random.choice(np.where(np.logical_and.reduce((cls4_0, cls2_1)))[0],cnt4-cnt,replace=False)
+        icls=np.concatenate((icls,icls_sample))
+        icls=np.sort(icls)
+
+    #sample 1
+    cnt=np.where(train['targets'][icls.tolist()][:,1]==1)[0].shape[0]
+    cls2_0=train['targets'][:,2]==0
+    if cnt4-cnt>0:
+        cls1_1=train['targets'][:,1]==1
+        icls_sample=np.random.choice(np.where(np.logical_and.reduce((cls4_0, cls2_0, cls1_1)))[0],cnt4-cnt,replace=False)
+        icls=np.concatenate((icls,icls_sample))
+        icls=np.sort(icls)
+
+    #sample 3
+    icls=np.sort(icls)
+    cnt=np.where(train['targets'][icls.tolist()][:,3]==1)[0].shape[0]
+    cls1_0=train['targets'][:,1]==0
+    if cnt4-cnt>0:
+        cls3_1=train['targets'][:,3]==1
+        icls_sample=np.random.choice(np.where(np.logical_and.reduce((cls4_0, cls2_0, cls1_0, cls3_1)))[0],cnt4-cnt,replace=False)
+        icls=np.concatenate((icls,icls_sample))
+        icls=np.sort(icls)
+
+    #sample 0
+    cnt=np.where(train['targets'][icls.tolist()][:,0]==1)[0].shape[0]
+    cls3_0=train['targets'][:,3]==0
+    if cnt4-cnt>0:
+        cls0_1=train['targets'][:,0]==1
+        icls_sample=np.random.choice(np.where(np.logical_and.reduce((cls4_0, cls2_0, cls1_0, cls3_0, cls0_1)))[0],cnt4-cnt,replace=False)
+        icls=np.concatenate((icls,icls_sample))
+        icls=np.sort(icls)
+
+    X_data=train['features'][icls.tolist()]
+    y_data=train['targets'][icls.tolist()]
+    
     return (X_data, y_data)
 
 def concat_diff(i): # batch discrimination -  increase generation diversity.
@@ -164,7 +207,7 @@ def gan_dis_model():
 seed = 7
 numpy.random.seed(seed)
 
-(X_data, y_data), num_classes, input_shape = load_data('CelebAHDF5_cls5_valid')
+(X_val, y_val), num_classes, input_shape = load_data('CelebAHDF5_cls5_val')
 # num_classes, input_shape = load_data_attr('CelebA_cls5')
 
 # build the model
@@ -178,23 +221,51 @@ model.compile(optimizer=opt,
           loss=losses.binary_crossentropy,
           metrics=['accuracy'])
 
-checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=False, mode='max')
-early_stop = EarlyStopping(monitor='val_loss', patience=100, verbose=1, mode='auto')
-csv_logger = CSVLogger('training.log', append=False)
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+csv_logger = CSVLogger('training.log', append=True)
 tensorboard = TensorBoard(log_dir='./tf-logs')
-lr_schedule = LearningRateScheduler(schedule)
 callbacks_list = [checkpoint, csv_logger, tensorboard]
 
+# f=open("history.pickle","rb")
+# history = History()
+# IPython.embed()
+# history.history = pickle.load(f)
+# f.close()
+# callbacks_list = [checkpoint, csv_logger, tensorboard, history]
+
+f=open("history.pickle","wb")
+
 batch_size=256
-for i in range(1000):
-    model=load_model(filepath)
-    (X_train, y_train)=load_boostrap()
-    result=model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=1, initial_epoch=i, batch_size=batch_size, verbose=2, callbacks=callbacks_list)
+train=h5py.File(homepath+'/Projects/data/CelebAHDF5/celeba_aligned_cropped_train_5cls.hdf5','r')
+icls4=np.where(train['targets'][:,4]==1)[0]
+cnt4=icls4.shape[0]
+
+print('start training')
+initial_epoch=0
+for i in range(1-initial_epoch):
+    # model=load_model(filepath)
+    print('epoch '+str(i+initial_epoch))
     
+    start = time.time()
+    (X_train, y_train)=load_bootstrap(train,icls4,cnt4)
+    end = time.time()
+    print('bootstrapping for '+str(end-start)+'s')
+
+
+    start = time.time()
+    history=model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=1, initial_epoch=i+initial_epoch, batch_size=batch_size, callbacks=callbacks_list)
+    end = time.time()
+    print('fit for '+str(end-start)+'s')
+
+    callbacks_list = [checkpoint, csv_logger, tensorboard, history]
+    pickle.dump(history.history, f)
+
 # Final evaluation of the model with generator
-scores = model.evaluate_generator(hdf5_generator('CelebA','test_cls5'),74)
-print("Baseline Error: %.2f%%" % (100-scores[1]*100))
+# scores = model.evaluate_generator(hdf5_generator('CelebA','test_cls5'),74)
+# print("Baseline Error: %.2f%%" % (100-scores[1]*100))
 # prediction=model.predict_generator(hdf5_generator('CelebA','test_cls5'), 74)
+
+f.close()
 
 
 # IPython.embed()
