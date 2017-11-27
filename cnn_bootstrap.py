@@ -299,9 +299,9 @@ icls4=np.where(train['targets'][:,4]==1)[0]
 cnt4=icls4.shape[0]
 
 print('start training')
-initial_epoch=150
+initial_epoch=298
 for i in range(1000-initial_epoch):
-    if i!=0:
+    if i+initial_epoch!=0:
         model=load_model(filepath_routine)
     # print('epoch '+str(i+initial_epoch))
     
@@ -312,7 +312,7 @@ for i in range(1000-initial_epoch):
 
     # IPython.embed()
 
-    history = model.fit_generator(hdf5_generator('CelebA','train_cls5',icls),icls.shape[0]//batch_size,i+1,initial_epoch=i,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=15138//batch_size,callbacks=callbacks_list)
+    history = model.fit_generator(hdf5_generator('CelebA','train_cls5',icls),icls.shape[0]//batch_size,i+initial_epoch+1,initial_epoch=i+initial_epoch,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=15138//batch_size,callbacks=callbacks_list)
 
 
     callbacks_list = [checkpoint, checkpoint_routine, csv_logger, tensorboard, history]
