@@ -298,17 +298,16 @@ train=h5py.File(homepath+'/Projects/data/CelebAHDF5/celeba_aligned_cropped_train
 icls4=np.where(train['targets'][:,4]==1)[0]
 cnt4=icls4.shape[0]
 
-print('start training')
-initial_epoch=501
-for i in range(600-initial_epoch):
+initial_epoch=700
+for i in range(800-initial_epoch):
     if i+initial_epoch!=0:
         model=load_model(filepath_routine)
     # print('epoch '+str(i+initial_epoch))
     
-    start = time.time()
+    # start = time.time()
     icls=load_bootstrap(train,icls4,cnt4)
-    end = time.time()
-    print('bootstrapping for '+str(end-start)+'s')
+    # end = time.time()
+    # print('bootstrapping for '+str(end-start)+'s')
 
     # IPython.embed()
 
