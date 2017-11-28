@@ -299,8 +299,8 @@ icls4=np.where(train['targets'][:,4]==1)[0]
 cnt4=icls4.shape[0]
 
 print('start training')
-initial_epoch=371
-for i in range(1000-initial_epoch):
+initial_epoch=501
+for i in range(600-initial_epoch):
     if i+initial_epoch!=0:
         model=load_model(filepath_routine)
     # print('epoch '+str(i+initial_epoch))
