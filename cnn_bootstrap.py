@@ -299,20 +299,20 @@ icls4=np.where(train['targets'][:,4]==1)[0]
 cnt4=icls4.shape[0]
 
 print('start training')
-initial_epoch=298
+initial_epoch=371
 for i in range(1000-initial_epoch):
     if i+initial_epoch!=0:
         model=load_model(filepath_routine)
     # print('epoch '+str(i+initial_epoch))
     
-    # start = time.time()
+    start = time.time()
     icls=load_bootstrap(train,icls4,cnt4)
-    # end = time.time()
-    # print('bootstrapping for '+str(end-start)+'s')
+    end = time.time()
+    print('bootstrapping for '+str(end-start)+'s')
 
     # IPython.embed()
 
-    history = model.fit_generator(hdf5_generator('CelebA','train_cls5',icls),icls.shape[0]//batch_size,i+initial_epoch+1,initial_epoch=i+initial_epoch,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=15138//batch_size,callbacks=callbacks_list, max_queue_size=1, workers=1, use_multiprocessing=False)
+    history = model.fit_generator(hdf5_generator('CelebA','train_cls5',icls),icls.shape[0]//batch_size,i+initial_epoch+1,initial_epoch=i+initial_epoch,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=15138//batch_size,callbacks=callbacks_list)
 
 
     callbacks_list = [checkpoint, checkpoint_routine, csv_logger, tensorboard, history]
