@@ -312,7 +312,7 @@ for i in range(1000-initial_epoch):
 
     # IPython.embed()
 
-    history = model.fit_generator(hdf5_generator('CelebA','train_cls5',icls),icls.shape[0]//batch_size,i+initial_epoch+1,initial_epoch=i+initial_epoch,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=15138//batch_size,callbacks=callbacks_list)
+    history = model.fit_generator(hdf5_generator('CelebA','train_cls5',icls),icls.shape[0]//batch_size,i+initial_epoch+1,initial_epoch=i+initial_epoch,validation_data=hdf5_generator('CelebA','valid_cls5'),validation_steps=15138//batch_size,callbacks=callbacks_list, max_queue_size=1, workers=1, use_multiprocessing=False)
 
 
     callbacks_list = [checkpoint, checkpoint_routine, csv_logger, tensorboard, history]
