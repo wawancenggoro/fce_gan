@@ -298,8 +298,8 @@ train=h5py.File(homepath+'/Projects/data/CelebAHDF5/celeba_aligned_cropped_train
 icls4=np.where(train['targets'][:,4]==1)[0]
 cnt4=icls4.shape[0]
 
-initial_epoch=700
-for i in range(800-initial_epoch):
+initial_epoch=900
+for i in range(1000-initial_epoch):
     if i+initial_epoch!=0:
         model=load_model(filepath_routine)
     # print('epoch '+str(i+initial_epoch))
