@@ -53,7 +53,7 @@ import tensorflow as tf
 #sess = K.get_session()
 #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
 #K.set_session(sess)
-reg_val = 5e-6
+reg_val = 1e-1
 
 def normalize_pixel(data):
     return data/255-.5
@@ -137,7 +137,7 @@ class ClassDependentCost(Layer):
         self.kernel = self.add_weight(name='kernel', 
                                       shape=(input_shape[1],),
                                       initializer='he_uniform',
-                                      regularizer=regularizers.l2(1e-1),
+                                      regularizer=regularizers.l2(reg_val),
                                       trainable=self.trainable)
         super(ClassDependentCost, self).build(input_shape)  # Be sure to call this somewhere!
 
@@ -194,7 +194,7 @@ def cosen_cnn_model(type):
     model = Model(inputs=inp, outputs=predictions) 
 
     if type=='cost':
-        for i in range(35):
+        for i in range(34):
             model.layers[i].trainable = False
 
     
@@ -222,11 +222,12 @@ filepath_routine_cost="cnn_cost_weights.hdf5"
 # Compile model
 # opt = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=1e-6)
 #opt = optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.97)
-opt = optimizers.SGD(lr=0.001, momentum=0, decay=0)
+opt = optimizers.SGD(lr=1e-3, momentum=0, decay=0)
+opt_cost = optimizers.SGD(lr=1e-3, momentum=0, decay=0)
 model.compile(optimizer=opt,
           loss=losses.binary_crossentropy,
           metrics=['accuracy'])
-model_cost.compile(optimizer=opt,
+model_cost.compile(optimizer=opt_cost,
           loss=losses.binary_crossentropy,
           metrics=['accuracy'])
 
@@ -239,7 +240,7 @@ def schedule(epoch):
           
 checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
 checkpoint_routine = ModelCheckpoint(filepath_routine, monitor='val_acc', verbose=1, save_best_only=False, mode='max')
-csv_logger = CSVLogger('training.log', append=False)
+csv_logger = CSVLogger('training.log', append=True)
 tensorboard = TensorBoard(log_dir='./tf-logs')
 lr_schedule = LearningRateScheduler(schedule)
 callbacks_list = [checkpoint, checkpoint_routine, csv_logger, tensorboard]
@@ -271,12 +272,12 @@ scores = model.evaluate_generator(hdf5_generator('CelebA','test_cls5'),74)
 print("Baseline Error: %.2f%%" % (100-scores[1]*100))
 # prediction=model.predict_generator(hdf5_generator('CelebA','test_cls5'), 74)
 
-output_before_cost = model.layers[34].output
-output_after_cost = model.layers[35].output
+output_before_cost = model.layers[33].output
+output_after_cost = model.layers[34].output
 functor = K.function([model.input]+ [K.learning_phase()], [output_before_cost, output_after_cost])
 
 X = hdf5_generator('CelebA','valid_cls5').__next__()[0]
 layer_outs = functor([X, 1.])
-weights = model.layers[35].get_weights()
+weights = model.layers[34].get_weights()
 
 IPython.embed()
