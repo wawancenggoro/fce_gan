@@ -55,8 +55,8 @@ reg_val = 1e-5
 
 model_homepath = '/home/wawan/git/'
 data_homepath = '/mnt/Storage/'
-filepath = 'cnn/unfrozen/cel12345_cnn_weights_best.hdf5'
-modelname = model_homepath+'fce_gan/save/stat/unfrozen_cel12345'
+filepath = 'cnn/unfrozen/cel012345_cnn_weights_best.hdf5'
+modelname = model_homepath+'fce_gan/save/stat/unfrozen_cel012345'
 
 
 def normalize_pixel(data):
@@ -676,7 +676,7 @@ num_classes, input_shape = load_data_attr('CelebA_cls5')
 # build the model
 
 # model = gan_dis_model()
-model = gan_dis_model_cel12345()
+model = gan_dis_model_cel012345()
 # model = cosen_cnn_model('normal')
 model.load_weights(model_homepath+'fce_gan/save/'+filepath)
 model.summary()     
