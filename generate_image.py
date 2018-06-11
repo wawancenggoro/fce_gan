@@ -228,11 +228,9 @@ gan_feed = gan(gm,dm)
 
 print('Ready. enter r() to train')
 
-def r_celebA(class_nbr, ep=10000,noise_level=.01,last_ep=0,dm_weights=None,gm_weights=None,save=None):
+def r_celebA(class_nbr, gm_weights=None, save=None):
     sess = K.get_session()
 
-    if dm_weights is not None:
-        dm.load_weights(dm_weights)
     if gm_weights is not None:
         gm.load_weights(gm_weights)
         
@@ -273,8 +271,8 @@ def save_image(save=False):
 
     cv2.imwrite(save,im[...,::-1]*255)
 
-r_celebA(class_nbr=0, ep=10000, last_ep=10000, dm_weights='dm_fce_0.hdf5', gm_weights='gm_fce_0.hdf5', save='fce_0')
-# r_celebA(class_nbr=1, ep=10000, last_ep=10000, dm_weights='dm_fce_1.hdf5', gm_weights='gm_fce_1.hdf5', save='fce_1')
-# r_celebA(class_nbr=2, ep=10000, last_ep=10000, dm_weights='dm_fce_2.hdf5', gm_weights='gm_fce_2.hdf5', save='fce_2')
-# r_celebA(class_nbr=3, ep=10000, last_ep=9810, dm_weights='dm_fce_3.hdf5', gm_weights='gm_fce_3.hdf5', save='fce_3')
-# r_celebA(class_nbr=4, ep=10000, last_ep=10000, dm_weights='dm_fce_4.hdf5', gm_weights='gm_fce_4.hdf5', save='fce_4')
+r_celebA(class_nbr=0, gm_weights='save/gm_fce_0.hdf5', save='fce_0')
+# r_celebA(class_nbr=1, gm_weights='save/gm_fce_1.hdf5', save='fce_1')
+# r_celebA(class_nbr=2, gm_weights='save/gm_fce_2.hdf5', save='fce_2')
+# r_celebA(class_nbr=3, gm_weights='save/gm_fce_3.hdf5', save='fce_3')
+# r_celebA(class_nbr=4, gm_weights='save/gm_fce_4.hdf5', save='fce_4')
