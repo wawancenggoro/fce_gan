@@ -60,9 +60,9 @@ def celebA():
     img_channels = 3
 
     # the data, shuffled and split between train and test sets
-    train=h5py.File('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_train.hdf5','r')
-#    valid=h5py.File('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_valid.hdf5','r')
-    test=h5py.File('/mnt/Storage/Projects/data/CelebAHDF5/celeba_aligned_cropped_test.hdf5','r')
+    train=h5py.File('../CelebAHDF5/celeba_aligned_cropped_train.hdf5','r')
+#    valid=h5py.File('../CelebAHDF5/celeba_aligned_cropped_valid.hdf5','r')
+    test=h5py.File('../CelebAHDF5/celeba_aligned_cropped_test.hdf5','r')
     
     return train, test
 
