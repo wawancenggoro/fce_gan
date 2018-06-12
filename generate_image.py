@@ -272,7 +272,7 @@ def save_image(save=False):
     cv2.imwrite(save,im[...,::-1]*255)
 
 r_celebA(class_nbr=0, gm_weights='save/gm_fce_0.hdf5', save='fce_0')
-# r_celebA(class_nbr=1, gm_weights='save/gm_fce_1.hdf5', save='fce_1')
-# r_celebA(class_nbr=2, gm_weights='save/gm_fce_2.hdf5', save='fce_2')
-# r_celebA(class_nbr=3, gm_weights='save/gm_fce_3.hdf5', save='fce_3')
-# r_celebA(class_nbr=4, gm_weights='save/gm_fce_4.hdf5', save='fce_4')
+r_celebA(class_nbr=1, gm_weights='save/gm_fce_1.hdf5', save='fce_1')
+r_celebA(class_nbr=2, gm_weights='save/gm_fce_2.hdf5', save='fce_2')
+r_celebA(class_nbr=3, gm_weights='save/gm_fce_3.hdf5', save='fce_3')
+r_celebA(class_nbr=4, gm_weights='save/gm_fce_4.hdf5', save='fce_4')
